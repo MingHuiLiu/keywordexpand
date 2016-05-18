@@ -55,6 +55,22 @@ namespace wordexpand{
 	}
 
 	bool Index::Retrieval(){
+		FILE*fi = fopen("./input","r");
+		if (fi == NULL) {
+			commom::LOG_INFO("open file error" + string(filein));
+			return false;
+		}
+		char buffer[MAX_LENTH];		
+		std::string str = "";
+		std::vector<std::string> v ;
+		std::vector<std::pair<string, float> > results;		
+		while ( f.ReadLine(buffer,MAX_LENTH,fi)!=NULL)	{
+			str = f.GetLine(buffer); 
+			f.Split("\t", str, v);
+			Retrieval(v,results);	
+		}
+		return true;
+		/*
 		string P="./db";
 		Xapian::Database db(P);
 		Xapian::Enquire enquire(db);
@@ -106,34 +122,14 @@ namespace wordexpand{
 			//std::cout << i.get_rank() + 1 <<": "  << " docid=" << *i<<std::endl;
 			std::cout<<i.get_document().get_data()<<std::endl;
 		}
-
+		*/
 
 	}
 	bool Retrieval(std::vector<string>& querylist,std::vector<std::pair<string, float> >& results){
-		string P="./db";
+		string P="../../data/indexdb/";
 		Xapian::Database db(P);
 		Xapian::Enquire enquire(db);
-
-		string query_string = "a";
-		Xapian::QueryParser qp;
-		//#define QUERY "title:ÐÂÎÅ AND content:ÄÐÀº"
-		qp.add_prefix("title", "T");
-		qp.add_prefix("content", "C");
-
-		//AND
-		commom::DEBUG_INFO("AND");
-		query_string = "title:a AND content:a";
-		//Xapian::Query query = qp.parse_query(query_string,7U,"T");
-		Xapian::Query query = qp.parse_query(query_string);
-		enquire.set_query(query);
-		Xapian::MSet matches = enquire.get_mset(0, 10);
-		std::cout << matches.get_matches_estimated() << " results found.\n";
-		std::cout << "Matches 1-" << matches.size() << ":\n" << std::endl;
-		for (Xapian::MSetIterator i = matches.begin(); i != matches.end(); ++i){
-			//std::cout << i.get_rank() + 1 <<": "  << " docid=" << *i<<std::endl;
-			std::cout<<i.get_document().get_data()<<std::endl;
-		}
-
+		RetrievalAll(enquire, querylist,results);
 		return true;
 	}
 
