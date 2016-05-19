@@ -12,6 +12,16 @@ typedef struct{
 	string massmsgcount;
 } bizuin; 
 
+typedef struct{
+	string bizuin;
+	string appmsgid;
+	string itemidx;
+	string title;
+	string ds;
+} articleuin; 
+
+
+
 namespace wordexpand{
  class Index{
 	public:
@@ -22,15 +32,19 @@ namespace wordexpand{
 		seg::Wordseg mseg;
 		bool Init(const char* dictpath);
 		bool BizIndex(const char* filein, const char* dbpath);
+		bool ArticleIndex(const char* filein, const char* dbpath);
 		bool Retrieval();
 		bool Retrieval(std::vector<string>& querylist,
 			std::vector<std::pair<string, float> >& results);
-		bool RetrievalAll(Xapian::Enquire& enquire, 
-			std::vector<string>& querylist,
-			std::vector<std::pair<string, float> >& results);
-		bool RetrievalTitie();
-		bool RetrievalDesc();
+		bool ArticleRetrieval(std::vector<string>& querylist,std::vector<std::pair<string, float> >& results);
+		bool ArticleRetrieval(Xapian::Enquire& enquire, std::vector<string>& querylist,
+			std::vector<std::pair<string, float> >& results,const char* relationship);
+		bool Retrieval(Xapian::Enquire& enquire, std::vector<string>& querylist,
+			std::vector<std::pair<string, float> >& results,const char* relationship);
 		string JionQuery(std::vector<string>& querylist, string str);
+		bool Rank(Xapian::MSet& matches,std::vector<std::pair<string, float> >& results);
+	public:
+		void TestRank(Xapian::MSet& matches);
 	};
 
 }
