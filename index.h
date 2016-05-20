@@ -27,22 +27,29 @@ namespace wordexpand{
 	public:
 		Index(){}
 		~Index(){}
-	public:
+	public://biz
 		commom::Func f;
 		seg::Wordseg mseg;
+		std::map<string, int>gamefilterdict;
+
+	public://biz
 		bool Init(const char* dictpath);
 		bool BizIndex(const char* filein, const char* dbpath);
 		bool ArticleIndex(const char* filein, const char* dbpath);
-		bool Retrieval();
+		bool Retrieval(const char* dictpath);
 		bool Retrieval(std::vector<string>& querylist,
 			std::vector<std::pair<string, float> >& results);
-		bool ArticleRetrieval(std::vector<string>& querylist,std::vector<std::pair<string, float> >& results);
-		bool ArticleRetrieval(Xapian::Enquire& enquire, std::vector<string>& querylist,
-			std::vector<std::pair<string, float> >& results,const char* relationship);
 		bool Retrieval(Xapian::Enquire& enquire, std::vector<string>& querylist,
 			std::vector<std::pair<string, float> >& results,const char* relationship);
 		string JionQuery(std::vector<string>& querylist, string str);
 		bool Rank(Xapian::MSet& matches,std::vector<std::pair<string, float> >& results);
+		bool FilerGame(Xapian::MSet& matches);
+
+	public://article
+		bool ArticleRetrieval(std::vector<string>& querylist,std::vector<std::pair<string, float> >& results);
+		bool ArticleRetrieval(Xapian::Enquire& enquire, std::vector<string>& querylist,
+			std::vector<std::pair<string, float> >& results,const char* relationship);
+
 	public:
 		void TestRank(Xapian::MSet& matches);
 	};
