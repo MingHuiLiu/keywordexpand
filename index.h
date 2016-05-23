@@ -43,7 +43,7 @@ namespace wordexpand{
 			std::vector<std::pair<string, float> >& results,const char* relationship);
 		string JionQuery(std::vector<string>& querylist, string str);
 		bool Rank(Xapian::MSet& matches,std::vector<std::pair<string, float> >& results);
-		bool FilerGame(Xapian::MSet& matches);
+		bool FilerGame(string str);
 
 	public://article
 		bool ArticleRetrieval(std::vector<string>& querylist,std::vector<std::pair<string, float> >& results);

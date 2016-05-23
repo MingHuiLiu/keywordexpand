@@ -31,8 +31,8 @@ namespace wordexpand{
 			Xapian::Document doc;			
 			doc.set_data(biz.uin);	
 			indexer.set_document(doc);
-			indexer.index_text(mseg.Segement(biz.bizname.c_str()), 1, "T");
-			indexer.index_text(mseg.Segement(biz.bizdesc.c_str()), 1, "C");	
+			indexer.index_text(mseg.QuickSegement(biz.bizname.c_str()), 1, "T");
+			indexer.index_text(mseg.QuickSegement(biz.bizdesc.c_str()), 1, "C");	
 			
 			//indexer.index_text(biz.bizname);
 			//indexer.index_text(biz.bizdesc);	
@@ -96,9 +96,8 @@ namespace wordexpand{
 			*/
 			doc.add_value(0,biz.ds);
 			db.add_document(doc);		
-			if((linenum++)%500 == 0){
-				linenum = 0;
-				db.flush();
+			if((linenum++)%10000 == 0){
+				//db.flush();
 				db.commit();
 			}			
 		}
@@ -117,7 +116,7 @@ namespace wordexpand{
 		char buffer[MAX_LENTH];	
 		while ( f.ReadLine(buffer,MAX_LENTH,fi)!=NULL)	{
 			str = f.GetLine(buffer); 
-			f.Split("\t", str, gamefilterdict);
+			f.Split(" ", str, gamefilterdict);
 		}
 		fclose(fi);
 		fi = fopen("./input","r");
@@ -160,6 +159,9 @@ namespace wordexpand{
 	//rank
 	bool Index::Rank(Xapian::MSet& matches,std::vector<std::pair<string, float> >& results){
 		for (Xapian::MSetIterator i = matches.begin(); i != matches.end(); ++i){
+			if((FilerGame(i.get_document().get_data() + i.get_document().get_value(1)))){
+				continue;
+			}
 			string str = i.get_document().get_data();
 			float score = (2*i.get_weight() + 3*log(atof((i.get_document().get_value(2)).c_str())) 
 				+ log( atof((i.get_document().get_value(3)).c_str())))/100.00; 
@@ -170,11 +172,20 @@ namespace wordexpand{
 	}
 
 	//filter
-	bool Index::FilerGame(Xapian::MSet& matches){
-		for (Xapian::MSetIterator i = matches.begin(); i != matches.end(); ++i){
-				
+	bool Index::FilerGame(string str){
+		std::vector<std::string> v ;
+		f.Split(" ",mseg.QuickSegement(str.c_str()),v);
+		bool flag = false;
+		for(std::vector<string>::iterator it = v.begin(); it != v.end(); it++){
+			//commom::DEBUG_INFO(*it);
+			if(gamefilterdict.find(*it) != gamefilterdict.end()){
+				flag = true;
+				//commom::DEBUG_INFO(*it);
+				//commom::DEBUG_INFO(str);
+				break;
+			}
 		}
-		return true;
+		return flag;
 	}
 
 	string Index::JionQuery(std::vector<string>& querylist, string str){
@@ -206,7 +217,7 @@ namespace wordexpand{
 			enquire.set_query(query);
 			enquire.set_sort_by_relevance_then_value(2);
 			Xapian::MSet matches = enquire.get_mset(0, 1000000);
-			Rank(matches,results);
+			//Rank(matches,results);
 			TestRank(matches);
 			return true;
 	}
@@ -221,10 +232,6 @@ namespace wordexpand{
 		ArticleRetrieval(enquire, querylist,results,"OR");
 		return true;
 	}
-
-
-
-
 	bool Index::ArticleRetrieval(Xapian::Enquire& enquire, std::vector<string>& querylist,
 		std::vector<std::pair<string, float> >& results, const char* relationship){
 			Xapian::QueryParser qp;
@@ -249,6 +256,9 @@ namespace wordexpand{
 	void Index::TestRank(Xapian::MSet& matches){
 		std::vector<std::pair<string, float> > results;
 		for (Xapian::MSetIterator i = matches.begin(); i != matches.end(); ++i){
+			if((FilerGame(i.get_document().get_data() + i.get_document().get_value(1)))){
+				continue;
+			}
 			string str = i.get_document().get_data()+"\t" 
 						+ f.ConvertToStr(i.get_weight()) + "\t"
 						+ f.ConvertToStr(i.get_document().get_value(0)) + "\t"
