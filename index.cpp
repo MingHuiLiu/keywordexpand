@@ -188,12 +188,12 @@ namespace wordexpand{
 				query += ("(title:" + querylist.at(i) + ")");
 			}else{
 				//联合查询
-				query += "(title:";
+				query += "(";
 				for(int j = 0; j< v.size()-1; j++){
-					query += ( v.at(j) + " AND ") ;
+					query += ("(title:" + v.at(j) + ") OR ") ;
 				}	
-				query +=  v.at(v.size() -1);
-				query += ")";
+				query += ("(title:" + v.at(v.size() -1));
+				query += "))";
 			}
 			/*词组之间关系*/
 			query += (" " + str + " ");
@@ -204,7 +204,7 @@ namespace wordexpand{
 				//联合查询
 				query += "(";
 				for(int j = 0; j< v.size()-1; j++){
-					query += ("content:" + v.at(j) + " AND ") ;
+					query += ("content:" + v.at(j) + " OR ") ;
 				}	
 				query += ("content:" + v.at(v.size() -1));
 				query += ")";
