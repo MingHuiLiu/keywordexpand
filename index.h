@@ -3,6 +3,7 @@
 #define _INDEX_H
 #include "../commom/func.h"
 #include "../wordseg/seg.h"
+//#include <mysql.h>
 #include <xapian.h>
 typedef struct{
 	string uin;

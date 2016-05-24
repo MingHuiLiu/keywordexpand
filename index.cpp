@@ -138,18 +138,6 @@ namespace wordexpand{
 		commom::DEBUG_INFO(f.ConvertToStr(querylist.size()));
 		Xapian::Database db;
 		db.add_database(Xapian::Database("../../data/database/bizindex/index/"));
-		/*
-		db.add_database(Xapian::Database("../../data/database/bizindex/a/"));
-		db.add_database(Xapian::Database("../../data/database/bizindex/b/"));
-		db.add_database(Xapian::Database("../../data/database/bizindex/c/"));
-		db.add_database(Xapian::Database("../../data/database/bizindex/d/"));
-		db.add_database(Xapian::Database("../../data/database/bizindex/e/"));
-		db.add_database(Xapian::Database("../../data/database/bizindex/f/"));
-		db.add_database(Xapian::Database("../../data/database/bizindex/g/"));
-		db.add_database(Xapian::Database("../../data/database/bizindex/h/"));
-		db.add_database(Xapian::Database("../../data/database/bizindex/i/"));
-		db.add_database(Xapian::Database("../../data/database/bizindex/j/"));
-		*/
 		Xapian::Enquire enquire(db);
 		commom::DEBUG_INFO("BEGIN RETRIEAL");
 		Retrieval(enquire, querylist,results,"OR");
@@ -190,11 +178,38 @@ namespace wordexpand{
 
 	string Index::JionQuery(std::vector<string>& querylist, string str){
 		string query = "";
+		//seg
+		std::vector<string> v;
 		for(int i = 0; i < querylist.size(); i++){
 			query += "(";
-			query += ("title:" + querylist.at(i));
+			/*词内部之间关系，针对包含字母的*/
+			f.Split(" ", mseg.QuickSegement(querylist.at(i).c_str()), v);
+			if(v.size() == 1){
+				query += ("(title:" + querylist.at(i) + ")");
+			}else{
+				//联合查询
+				query += "(title:";
+				for(int j = 0; j< v.size()-1; j++){
+					query += ( v.at(j) + " AND ") ;
+				}	
+				query +=  v.at(v.size() -1);
+				query += ")";
+			}
+			/*词组之间关系*/
 			query += (" " + str + " ");
-			query += ("content:" + querylist.at(i));	
+			//f.Split(" ", querylist.at(i), v);
+			if(v.size() == 1){
+				query += ("(content:" + querylist.at(i) + ")");
+			}else{
+				//联合查询
+				query += "(";
+				for(int j = 0; j< v.size()-1; j++){
+					query += ("content:" + v.at(j) + " AND ") ;
+				}	
+				query += ("content:" + v.at(v.size() -1));
+				query += ")";
+			}
+			//query += ("content:" + querylist.at(i));	
 			query += ")";
 			if(i+1 <querylist.size()){
 				query += " OR ";
@@ -213,6 +228,7 @@ namespace wordexpand{
 				commom::DEBUG_INFO(querylist.at(i));
 			}
 			string query_string = JionQuery(querylist, relationship);
+			commom::DEBUG_INFO(query_string);
 			Xapian::Query query = qp.parse_query(query_string);
 			enquire.set_query(query);
 			enquire.set_sort_by_relevance_then_value(2);
