@@ -1,10 +1,35 @@
 #include "index.h"
 namespace wordexpand{
+
+	//初始化索引
 	bool Index::Init(const char* dictpath){
 		mseg.InitDict(dictpath);
 		commom::DEBUG_INFO("INIT OK");
 		return true;
 	}
+
+	//初始化检索
+	bool Index::InitRetrieval(const char* dictpath){
+		mseg.InitDict(dictpath);
+		FILE*fi = fopen((string(dictpath) + "gamefilterdict").c_str(),"r");
+		if (fi == NULL) {
+			commom::LOG_INFO("open file error");
+			return false;
+		}
+		std::string str = "";
+		char buffer[MAX_LENTH];	
+		while ( f.ReadLine(buffer,MAX_LENTH,fi)!=NULL)	{
+			str = f.GetLine(buffer); 
+			f.Split(" ", str, gamefilterdict);
+		}
+		fclose(fi);
+		InitMysql();
+		commom::DEBUG_INFO("INIT OK");
+		return true;
+	}
+
+
+	//*******************************INDEX**************************************//
 	bool Index::BizIndex(const char* filein, const char* dbpath){
 		commom::DEBUG_INFO("begin index");
 		Xapian::WritableDatabase db(dbpath ,Xapian::DB_CREATE_OR_OPEN);
@@ -34,8 +59,6 @@ namespace wordexpand{
 			indexer.index_text(mseg.QuickSegement(biz.bizname.c_str()), 1, "T");
 			indexer.index_text(mseg.QuickSegement(biz.bizdesc.c_str()), 1, "C");	
 			
-			//indexer.index_text(biz.bizname);
-			//indexer.index_text(biz.bizdesc);	
 			/*
 			for (Xapian::TermIterator iter = doc.termlist_begin(); iter != doc.termlist_end(); ++iter){
 				std::cout<<*iter<<std::endl;
@@ -89,59 +112,50 @@ namespace wordexpand{
 				}
 			}
 			indexer.index_text(str);
-			/*
-			for (Xapian::TermIterator iter = doc.termlist_begin(); iter != doc.termlist_end(); ++iter){
-				std::cout<<*iter<<std::endl;
-			}
-			*/
 			doc.add_value(0,biz.ds);
 			db.add_document(doc);		
 			if((linenum++)%10000 == 0){
-				//db.flush();
 				db.commit();
 			}			
 		}
 		db.flush();
 		return true;
 	}
+	//*******************************INDEX**************************************//
 
-	bool Index::Retrieval(const char* dictpath){
-		mseg.InitDict(dictpath);
-		FILE*fi = fopen((string(dictpath) + "gamefilterdict").c_str(),"r");
-		if (fi == NULL) {
-			commom::LOG_INFO("open file error");
-			return false;
-		}
-		std::string str = "";
-		char buffer[MAX_LENTH];	
-		while ( f.ReadLine(buffer,MAX_LENTH,fi)!=NULL)	{
-			str = f.GetLine(buffer); 
-			f.Split(" ", str, gamefilterdict);
-		}
-		fclose(fi);
-		fi = fopen("./input","r");
-		if (fi == NULL) {
-			commom::LOG_INFO("open file error");
-			return false;
-		}		
+	//*******************************RETREVIAL**********************************//
+	bool Index::Retrieval(string& query,string& conf){
 		std::vector<std::string> v ;
+		std::vector<std::string> res ;
+		std::vector<std::string> tmp ;
+		std::map<string, string> taskinfo;
 		std::vector<std::pair<string, float> > results;		
-		while ( f.ReadLine(buffer,MAX_LENTH,fi)!=NULL)	{
-			str = f.GetLine(buffer); 
-			f.Split("\t", str, v);
-			Retrieval(v,results);	
+		//step1: query 检查,检查query结构， 参数是否完整
+
+		//step2: query 解析
+		f.Split(",", query, v);
+		f.Split(",", conf, res);
+		for(int i = 0; i < res.size(); i++){
+			f.Split(":",res.at(i),tmp);
+			if(tmp.size() == 2){
+				taskinfo[tmp.at(0)] = tmp.at(1);
+			}
 		}
-		return true;	
-		//OP_VALUE_GE 条件查询
+		//step3: query 查询
+		UpdataTask();
+		if(BizRetrieval(v,results) != true){
+			commom::LOG_INFO("BizRetrieval Error");
+		}
+		//step4: query 组合排序、输出
+
+
 	}
-	bool Index::Retrieval(std::vector<string>& querylist,std::vector<std::pair<string, float> >& results){
-		commom::DEBUG_INFO(f.ConvertToStr(querylist.size()));
+	bool Index::BizRetrieval(std::vector<string>& querylist,std::vector<std::pair<string, float> >& results){
+		
 		Xapian::Database db;
 		db.add_database(Xapian::Database("../../data/database/bizindex/index/"));
 		Xapian::Enquire enquire(db);
-		commom::DEBUG_INFO("BEGIN RETRIEAL");
-		Retrieval(enquire, querylist,results,"OR");
-		return true;
+		return BizRetrieval(enquire, querylist,results,"OR");
 	}
 
 	//rank
@@ -163,17 +177,12 @@ namespace wordexpand{
 	bool Index::FilerGame(string str){
 		std::vector<std::string> v ;
 		f.Split(" ",mseg.QuickSegement(str.c_str()),v);
-		bool flag = false;
 		for(std::vector<string>::iterator it = v.begin(); it != v.end(); it++){
-			//commom::DEBUG_INFO(*it);
 			if(gamefilterdict.find(*it) != gamefilterdict.end()){
-				flag = true;
-				//commom::DEBUG_INFO(*it);
-				//commom::DEBUG_INFO(str);
-				break;
+				return true;
 			}
 		}
-		return flag;
+		return false;
 	}
 
 	string Index::JionQuery(std::vector<string>& querylist, string str){
@@ -219,7 +228,7 @@ namespace wordexpand{
 	}
 
 
-	bool Index::Retrieval(Xapian::Enquire& enquire, std::vector<string>& querylist,
+	bool Index::BizRetrieval(Xapian::Enquire& enquire, std::vector<string>& querylist,
 		std::vector<std::pair<string, float> >& results, const char* relationship){
 			Xapian::QueryParser qp;
 			qp.add_prefix("title", "T");
@@ -267,8 +276,9 @@ namespace wordexpand{
 			return true;
 
 	}
+	//*******************************RETREVIAL**********************************//
 
-
+	//////////////////////////////***********TEST************/////////////////
 	void Index::TestRank(Xapian::MSet& matches){
 		std::vector<std::pair<string, float> > results;
 		for (Xapian::MSetIterator i = matches.begin(); i != matches.end(); ++i){
@@ -290,5 +300,73 @@ namespace wordexpand{
 			commom::DEBUG_INFO(results.at(i).first + "\t" + f.ConvertToStr(results.at(i).second));
 		}
 	}
+
+	bool Index::TestRetrieval(){
+		FILE*fi  = fopen("./input","r");
+		if (fi == NULL) {
+			commom::LOG_INFO("open file error");
+			return false;
+		}		
+		std::string str = "";
+		char buffer[MAX_LENTH];		
+		while ( f.ReadLine(buffer,MAX_LENTH,fi)!=NULL)	{
+			str = f.GetLine(buffer); 
+			Retrieval(str);
+		}
+		return true;	
+	}
+	//////////////////////////////***********TEST************/////////////////
+
+	//////////////////////////////***********MYSQL************/////////////////
+	bool Index::InitMysql(){
+		mysql_init(&myCont);
+		if(!mysql_real_connect(&myCont,"host","user","pswd","table",8080,NULL,0)){
+			commom::LOG_INFO("connect mysql error");
+			return false;
+		}
+		return true;
+	}
+
+	bool Index::ExeQuery(string& query){
+		if(mysql_query(&myCont, query.c_str())){  
+			commom::LOG_INFO("Query Error:" + string(mysql_error(&myCont)));
+			return false;
+		}else{
+			//检查插入结果
+			return true;
+		}
+	}
+
+	bool Index::UpdataTask(std::map<string, string>& taskinfo){
+		string strsql = "";
+		strsql += "version=%s, "%((version+1));
+		strsql += "widetableid=%s, "%(widetableId);
+		strsql += "feature_name='%s', "%(featureName);
+		strsql += "feature_cname='%s', "%(featureCName);
+		strsql += "feature_type='%s', "%(featureType);
+		strsql += "feature_remark='%s', "%(featureRemark);
+		strsql += "feature_idx=%s, "%(featureIdx);
+		strsql += "effective_time='%s', "%(effectiveTime);
+		strsql += "createuser='%s', "%(createUser);
+		strsql += "updateuser='%s', "%(common.GetWebUser());
+		strsql += "responsible_person='%s', "%(responsiblePerson);
+		strsql += "createtime='%s'"%(createTime);
+
+		strsql = strsql.encode("utf-8")
+		print "\n********SQL: ", strsql, "**************\n"
+
+
+		newFeatureId = common.DoExcuteMySQL(strsql, common.GetDataMiningMYSQLConnNew(), dict(op="insert"))
+		if featureId is not None and int(featureId) > 0:
+		return featureId
+			else:
+
+
+
+
+
+		//keyword_task
+	}
+	//////////////////////////////***********MYSQL************/////////////////
 
 }
