@@ -129,7 +129,7 @@ namespace wordexpand{
 		std::vector<std::string> res ;
 		std::vector<std::string> tmp ;
 		std::map<string, string> taskinfo;
-		std::vector<std::pair<string, float> > results;		
+		std::vector<bizinfo> results;		
 		//step1: query 检查,检查query结构， 参数是否完整
 
 		//step2: query 解析
@@ -142,15 +142,20 @@ namespace wordexpand{
 			}
 		}
 		//step3: query 查询
-		UpdataTask();
+		//更新任务表
+		UpdataTask(taskinfo);
+		//更新关键词表
+		UpdataKeywords(v,taskinfo);
 		if(BizRetrieval(v,results) != true){
 			commom::LOG_INFO("BizRetrieval Error");
 		}
+		UpdataBiz(results, taskinfo);
+		
 		//step4: query 组合排序、输出
 
 
 	}
-	bool Index::BizRetrieval(std::vector<string>& querylist,std::vector<std::pair<string, float> >& results){
+	bool Index::BizRetrieval(std::vector<string>& querylist,std::vector<bizinfo>& results){
 		
 		Xapian::Database db;
 		db.add_database(Xapian::Database("../../data/database/bizindex/index/"));
@@ -158,18 +163,25 @@ namespace wordexpand{
 		return BizRetrieval(enquire, querylist,results,"OR");
 	}
 
+	bool Bizrank(const bizinfo& x, const bizinfo& y){
+		return x.score > y.score;
+	}
 	//rank
-	bool Index::Rank(Xapian::MSet& matches,std::vector<std::pair<string, float> >& results){
+	bool Index::Rank(Xapian::MSet& matches,std::vector<bizinfo>& results){
+		bizinfo tmp;
 		for (Xapian::MSetIterator i = matches.begin(); i != matches.end(); ++i){
-			if((FilerGame(i.get_document().get_data() + i.get_document().get_value(1)))){
+			tmp.uin = i.get_document().get_data();
+			tmp.bizname = i.get_document().get_value(0);
+			tmp.bizdesc = i.get_document().get_value(1);
+			if(FilerGame(tmp.bizname + tmp.bizdesc)){
 				continue;
 			}
-			string str = i.get_document().get_data();
 			float score = (2*i.get_weight() + 3*log(atof((i.get_document().get_value(2)).c_str())) 
 				+ log( atof((i.get_document().get_value(3)).c_str())))/100.00; 
-			results.push_back(std::pair<string, float>(str,score));			
+			tmp.score = score;
+			results.push_back(tmp);			
 		}
-		sort(results.begin(), results.end(), f.SortBySecondGreater);
+		sort(results.begin(), results.end(),Bizrank);
 		return true;
 	}
 
@@ -229,22 +241,22 @@ namespace wordexpand{
 
 
 	bool Index::BizRetrieval(Xapian::Enquire& enquire, std::vector<string>& querylist,
-		std::vector<std::pair<string, float> >& results, const char* relationship){
-			Xapian::QueryParser qp;
-			qp.add_prefix("title", "T");
-			qp.add_prefix("content", "C");
-			for(int i =0; i< querylist.size(); i++){
-				commom::DEBUG_INFO(querylist.at(i));
-			}
-			string query_string = JionQuery(querylist, relationship);
-			commom::DEBUG_INFO(query_string);
-			Xapian::Query query = qp.parse_query(query_string);
-			enquire.set_query(query);
-			enquire.set_sort_by_relevance_then_value(2);
-			Xapian::MSet matches = enquire.get_mset(0, 1000000);
-			//Rank(matches,results);
-			TestRank(matches);
-			return true;
+							std::vector<bizinfo>& results, const char* relationship){
+		Xapian::QueryParser qp;
+		qp.add_prefix("title", "T");
+		qp.add_prefix("content", "C");
+		for(int i =0; i< querylist.size(); i++){
+			commom::DEBUG_INFO(querylist.at(i));
+		}
+		string query_string = JionQuery(querylist, relationship);
+		commom::DEBUG_INFO(query_string);
+		Xapian::Query query = qp.parse_query(query_string);
+		enquire.set_query(query);
+		enquire.set_sort_by_relevance_then_value(2);
+		Xapian::MSet matches = enquire.get_mset(0, 1000000);
+		Rank(matches,results);
+		TestRank(matches);
+		return true;
 	}
 
 
@@ -271,7 +283,7 @@ namespace wordexpand{
 			enquire.set_query(query);
 			enquire.set_sort_by_relevance_then_value(2);
 			Xapian::MSet matches = enquire.get_mset(0, 1000000);
-			Rank(matches,results);
+			//Rank(matches,results);
 			TestRank(matches);
 			return true;
 
@@ -311,7 +323,7 @@ namespace wordexpand{
 		char buffer[MAX_LENTH];		
 		while ( f.ReadLine(buffer,MAX_LENTH,fi)!=NULL)	{
 			str = f.GetLine(buffer); 
-			Retrieval(str);
+			Retrieval(str,str);
 		}
 		return true;	
 	}
@@ -339,34 +351,69 @@ namespace wordexpand{
 
 	bool Index::UpdataTask(std::map<string, string>& taskinfo){
 		string strsql = "";
-		strsql += "version=%s, "%((version+1));
-		strsql += "widetableid=%s, "%(widetableId);
-		strsql += "feature_name='%s', "%(featureName);
-		strsql += "feature_cname='%s', "%(featureCName);
-		strsql += "feature_type='%s', "%(featureType);
-		strsql += "feature_remark='%s', "%(featureRemark);
-		strsql += "feature_idx=%s, "%(featureIdx);
-		strsql += "effective_time='%s', "%(effectiveTime);
-		strsql += "createuser='%s', "%(createUser);
-		strsql += "updateuser='%s', "%(common.GetWebUser());
-		strsql += "responsible_person='%s', "%(responsiblePerson);
-		strsql += "createtime='%s'"%(createTime);
-
-		strsql = strsql.encode("utf-8")
-		print "\n********SQL: ", strsql, "**************\n"
-
-
-		newFeatureId = common.DoExcuteMySQL(strsql, common.GetDataMiningMYSQLConnNew(), dict(op="insert"))
-		if featureId is not None and int(featureId) > 0:
-		return featureId
-			else:
-
-
-
-
-
-		//keyword_task
+		strsql += "insert into wxytesttask set ";
+		strsql += (" task_id= " + taskinfo["task_id"]);
+		strsql += (" task_version= " + taskinfo["task_version"]);
+		strsql += (" input= " + taskinfo["input"]);
+		strsql += (" task_name= " + taskinfo["task_name"]);
+		strsql += (" task_cname= " + taskinfo["task_cname"]);
+		strsql += (" step= " + taskinfo["step"]);
+		strsql += (" pack_name= " + taskinfo["pack_name"]);
+		strsql += (" user_num= " + taskinfo["user_num"]);
+		strsql += (" gamecenter_id= " + taskinfo["gamecenter_id"]);
+		strsql += (" performance_name= " + taskinfo["performance_name"]);
+		strsql += (" biz_url= " + taskinfo["biz_url"]);
+		strsql += (" modify_user= " + taskinfo["modify_user"]);
+		strsql += (" create_time= " + taskinfo["create_time"]);
+		strsql += (" modify_time= " + taskinfo["modify_time"]);
+		commom::DEBUG_INFO(strsql);
+		return ExeQuery(strsql);
 	}
-	//////////////////////////////***********MYSQL************/////////////////
 
+	bool Index::UpdataKeywords(std::vector<std::string>& v, std::map<string, string>& taskinfo){
+		for(int i = 0; i< v.size(); i++){
+			string strsql = "";
+			strsql += "insert into wxytesttask set ";
+			strsql += (" task_id= " + taskinfo["task_id"]);
+			strsql += (" task_version= " + taskinfo["task_version"]);
+			strsql += (" keyword= " + v.at(i));
+			strsql += (" source=  ");
+			strsql += (" score= 1");
+			strsql += (" iteration= 1");
+			strsql += (" delete_status = 0");
+			strsql += (" modify_user= " + taskinfo["modify_user"]);
+			strsql += (" modify_time= " + taskinfo["modify_time"]);
+			commom::DEBUG_INFO(strsql);
+			ExeQuery(strsql);
+		}	
+		return true;
+	}
+
+	bool Index::UpdataBiz(std::vector<bizinfo>& results,std::map<string, string>& taskinfo){
+		for(int i = 0; i< results.size(); i++){
+			string strsql = "";
+			strsql += "insert into wxytesttask set ";
+			strsql += (" task_id= " + taskinfo["task_id"]);
+			strsql += (" task_version= " + taskinfo["task_version"]);
+			strsql += (" biz= " + results.at(i).uin);
+			strsql += (" biz_title= " + results.at(i).bizname);
+			strsql += (" biz_info= " + results.at(i).bizdesc);
+			strsql += (" biz_auth=  ");
+			strsql += (" biz_sub= 1");
+			strsql += (" match_list =  ");
+			strsql += (" type= 0");
+			strsql += (" source_word= ");
+			strsql += (" source =  ");
+			strsql += (" score= " + f.ConvertToStr(results.at(i).score));
+			strsql += (" iteration = 1");
+			strsql += (" delete_status = 0");
+			strsql += (" modify_user= " + taskinfo["modify_user"]);
+			strsql += (" modify_time= " + taskinfo["modify_time"]);
+			commom::DEBUG_INFO(strsql);
+			ExeQuery(strsql);
+		}	
+		return true;
+	}
+
+	//////////////////////////////***********MYSQL************////////////////
 }

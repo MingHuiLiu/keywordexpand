@@ -15,37 +15,51 @@ typedef struct{
 } bizuin; 
 
 typedef struct{
+	string uin;
+	string bizname;
+	string bizdesc;
+	float score;
+} bizinfo; 
+
+typedef struct{
 	string bizuin;
 	string appmsgid;
 	string itemidx;
 	string title;
 	string ds;
 } articleuin; 
+
+stat_db = {}
+stat_db['ip'] =  '10.191.150.220'
+	stat_db['port'] = 3306
+	stat_db['user'] = 'qspace'
+	stat_db['pass'] = 'forconnect'
+	stat_db['db'] = 'stat'
+
+#mmwebitildb10
+	datamining_db = {}
+datamining_db['ip'] =  '10.234.148.106'
+	datamining_db['port'] = 3306
+	datamining_db['user'] = 'qspace'
+	datamining_db['pass'] = 'forconnect'
+	datamining_db['db'] = 'stat'
+
+	datamining_db_new = {}
+datamining_db_new['ip'] =  '10.234.148.106'
+	datamining_db_new['port'] = 3306
+	datamining_db_new['user'] = 'qspace'
+	datamining_db_new['pass'] = 'forconnect'
+	datamining_db_new['db'] = 'data'
 /*
-typedef struct{
-	string task_id;
-	string task_version;
-	string input;
-	string task_name;
-	string task_cname;
-	string step;
-		pack_name
-		done_name
-		user_num
-		gamecenter_id
-		performance_name
-		status
-		biz_url
-		creator
-		modify_user
-		create_time
-		modify_time
+keyword_task
+keyword_word_filter_result
+keyword_biz_filter_result
+keyword_article_category
+±íÃû
 
 
-} taskinfo;
 
 */
-
 
 namespace wordexpand{
  class Index{
@@ -64,12 +78,11 @@ namespace wordexpand{
 		bool BizIndex(const char* filein, const char* dbpath);
 		bool ArticleIndex(const char* filein, const char* dbpath);
 		bool Retrieval(string& query,string& conf);
-		bool BizRetrieval(std::vector<string>& querylist,
-			std::vector<std::pair<string, float> >& results);
+		bool BizRetrieval(std::vector<string>& querylist,std::vector<bizinfo>& results);
 		bool BizRetrieval(Xapian::Enquire& enquire, std::vector<string>& querylist,
-			std::vector<std::pair<string, float> >& results,const char* relationship);
+						 std::vector<bizinfo>& results,const char* relationship);
 		string JionQuery(std::vector<string>& querylist, string str);
-		bool Rank(Xapian::MSet& matches,std::vector<std::pair<string, float> >& results);
+		bool Rank(Xapian::MSet& matches,std::vector<bizinfo>& results);
 		bool FilerGame(string str);
 
 	public://article
@@ -82,12 +95,13 @@ namespace wordexpand{
 		bool InitMysql();
 		bool ExeQuery(string& query);
 		bool UpdataTask(std::map<string, string>& taskinfo);
-		bool UpdataKeywords();
-		bool UpdataBiz();
+		bool UpdataKeywords(std::vector<std::string>& v, std::map<string, string>& taskinfo);
+		bool UpdataBiz(std::vector<bizinfo>& results, std::map<string, string>& taskinfo);
 		bool UpdataArticle();
 		
 
 	public:
+		//bool Bizrank(const bizinfo& x, const bizinfo& y);
 		bool TestRetrieval();
 		void TestRank(Xapian::MSet& matches);
 	};
