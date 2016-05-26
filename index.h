@@ -28,7 +28,7 @@ typedef struct{
 	string title;
 	string ds;
 } articleuin; 
-
+/*
 stat_db = {}
 stat_db['ip'] =  '10.191.150.220'
 	stat_db['port'] = 3306
@@ -56,9 +56,6 @@ keyword_word_filter_result
 keyword_biz_filter_result
 keyword_article_category
 ±íÃû
-
-
-
 */
 
 namespace wordexpand{
@@ -94,10 +91,11 @@ namespace wordexpand{
 	public://mysql
 		bool InitMysql();
 		bool ExeQuery(string& query);
-		bool UpdataTask(std::map<string, string>& taskinfo);
+		bool AddTask(std::map<string, string>& taskinfo);
 		bool UpdataKeywords(std::vector<std::string>& v, std::map<string, string>& taskinfo);
 		bool UpdataBiz(std::vector<bizinfo>& results, std::map<string, string>& taskinfo);
 		bool UpdataArticle();
+		int GetTaskId();
 		
 
 	public:
