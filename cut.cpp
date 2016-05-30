@@ -92,6 +92,16 @@ void cut_file(const char* filein, const char* dbpath){
 	fo[18] = fopen((dbpath + string("20160519") + string("/article")).c_str(),"ab+");
 	fo[19] = fopen((dbpath + string("20160520") + string("/article")).c_str(),"ab+");
 	fo[20] = fopen((dbpath + string("20160521") + string("/article")).c_str(),"ab+");
+	fo[21] = fopen((dbpath + string("20160522") + string("/article")).c_str(),"ab+");
+	fo[22] = fopen((dbpath + string("20160523") + string("/article")).c_str(),"ab+");
+	fo[23] = fopen((dbpath + string("20160524") + string("/article")).c_str(),"ab+");
+	fo[24] = fopen((dbpath + string("20160525") + string("/article")).c_str(),"ab+");
+	fo[25] = fopen((dbpath + string("20160526") + string("/article")).c_str(),"ab+");
+	fo[26] = fopen((dbpath + string("20160527") + string("/article")).c_str(),"ab+");
+	fo[27] = fopen((dbpath + string("20160528") + string("/article")).c_str(),"ab+");
+	fo[28] = fopen((dbpath + string("20160529") + string("/article")).c_str(),"ab+");
+	fo[29] = fopen((dbpath + string("20160530") + string("/article")).c_str(),"ab+");
+
 	char buffer[MAX_LENTH];		
 	std::string str = "";
 	std::vector<std::string> v ;
