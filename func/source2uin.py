@@ -49,6 +49,8 @@ def get_article_click_uin(tdw):
             bizuin = articleis[0]
             msgid = articleis[1]
             itemidx = articleis[2]
+            if bizuin == 'READ':
+                continue
             if idx != 0:
                 sql += " or "
             else:

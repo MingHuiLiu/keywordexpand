@@ -181,12 +181,12 @@ namespace wordexpand{
 		//更新任务表
 		AddTask(taskinfo);
 		//更新关键词表
-		UpdataKeywords(v,taskinfo);
-		UpdataKeywords(v,taskinfo);
+		//UpdataKeywords(v,taskinfo);
+		//UpdataKeywords(v,taskinfo);
 		if(BizRetrieval(v,bizresults) != true){
 			commom::LOG_INFO("BizRetrieval Error");
 		}
-		UpdataBiz(bizresults, taskinfo);
+		//UpdataBiz(bizresults, taskinfo);
 		if(ArticleRetrieval(v,articleresults) != true){
 			commom::LOG_INFO("ArticleRetrieval Error");
 		}
@@ -220,6 +220,9 @@ namespace wordexpand{
 	}
 
 	bool Bizrank(const bizinfo& x, const bizinfo& y){
+		return x.score > y.score;
+	}
+	bool Articlerank(const articleinfo& x, const articleinfo& y){
 		return x.score > y.score;
 	}
 	//rank
@@ -257,7 +260,7 @@ namespace wordexpand{
 			tmp.score = i.get_weight() ;
 			results.push_back(tmp);			
 		}
-		sort(results.begin(), results.end(),Bizrank);
+		sort(results.begin(), results.end(),Articlerank);
 		int x =  results.size() < 100 ? results.size() : 100 ;
 		for(int i =0; i< x; i++){
 			commom::DEBUG_INFO(results.at(i).title + "\t" + f.ConvertToStr(results.at(i).score));

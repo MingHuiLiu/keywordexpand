@@ -110,7 +110,7 @@ class APIWrapper_LZ:
             #taskId = str(random.randint(0,100));
             #获取此任务的唯一ID
             #taskId = str(taskId) + "_" + str(time.strftime('%Y%m%d%m%s',time.localtime(time.time())))
-            taskId = "201605311971"
+            taskId = "201605311972"
             dir = "./"
             filename = "testinput"
             #print filename
