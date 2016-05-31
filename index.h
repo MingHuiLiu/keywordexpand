@@ -28,6 +28,14 @@ typedef struct{
 	string title;
 	string ds;
 } articleuin; 
+
+typedef struct{
+	string articleuin;
+	string title;
+	float score;
+} articleinfo; 
+
+
 /*
 stat_db = {}
 stat_db['ip'] =  '10.191.150.220'
@@ -80,12 +88,13 @@ namespace wordexpand{
 						 std::vector<bizinfo>& results,const char* relationship);
 		string JionQuery(std::vector<string>& querylist, string str);
 		bool Rank(Xapian::MSet& matches,std::vector<bizinfo>& results);
+		bool ArticleRank(Xapian::MSet& matches,std::vector<articleinfo>& results);
 		bool FilerGame(string str);
 
 	public://article
-		bool ArticleRetrieval(std::vector<string>& querylist,std::vector<std::pair<string, float> >& results);
+		bool ArticleRetrieval(std::vector<string>& querylist,std::vector<articleinfo>& results);
 		bool ArticleRetrieval(Xapian::Enquire& enquire, std::vector<string>& querylist,
-			std::vector<std::pair<string, float> >& results,const char* relationship);
+			std::vector<articleinfo>& results,const char* relationship);
 
 
 	public://mysql

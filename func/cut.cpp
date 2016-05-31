@@ -111,15 +111,18 @@ void cut_file(const char* filein, const char* dbpath){
 		f.Split("\t", str, v);
 		if(v.size() != 5)continue;
 		int fre = atoi(v.at(4).c_str()) - 20160501;
+		if((fre < 0 )||(fre > 29)){
+			commom::DEBUG_INFO(str);
+			continue;
+		}
 		str += "\n";
 		f.WiteLine(str.c_str(),fo[fre]);
 	}
-	for(int i =0; i < 20; i++){
+	for(int i =0; i < 30; i++){
 		fclose(fo[i]);
 	}	
+	delete fo;
 }
-
-
 
 int main(int argc, char *argv[]) {
 	cut_file(argv[1], argv[2]);

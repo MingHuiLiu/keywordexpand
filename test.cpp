@@ -1,7 +1,6 @@
 #include "index.h"
 #include "sever.h"
 int main(int argc, char *argv[]) {
-	/*
 	wordexpand::Index index;
 	if(atoi(argv[1]) == 1){
 		index.Init(argv[4]);
@@ -16,8 +15,7 @@ int main(int argc, char *argv[]) {
 		index.Init(argv[4]);
 		index.ArticleIndex(argv[2],argv[3]);
 	}
-	*/
-	wordexpand::Sever mysever;
-	mysever.StartSever();
+	//wordexpand::Sever mysever;
+	//mysever.StartSever();
 	return 0;
 }

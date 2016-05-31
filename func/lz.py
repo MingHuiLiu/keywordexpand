@@ -96,7 +96,7 @@ class APIWrapper_LZ:
     ## 4.提醒用户任务已经完成-----------------------------------------------
     def RequestBiz2Uin(self):
         try:
-            
+
             #解析参数，写入本地文件文件
             #取公众号和文章的ID
             '''
@@ -110,7 +110,7 @@ class APIWrapper_LZ:
             #taskId = str(random.randint(0,100));
             #获取此任务的唯一ID
             #taskId = str(taskId) + "_" + str(time.strftime('%Y%m%d%m%s',time.localtime(time.time())))
-            taskId = "201605301965"
+            taskId = "201605311971"
             dir = "./"
             filename = "testinput"
             #print filename
@@ -145,17 +145,17 @@ class APIWrapper_LZ:
                 print "CreateHDFSToTDWId error"
                 return None
             #输出到临时表daily_res_keyword_uinlis
-            '''
+
             getuinsID = self.getuins(CreateHDFSToTDWId,taskId)
             if(getuinsID == -1):
-                #mylog.MyDebugLog("getuins error")
+                print "getuins error"
                 return None
-            taskParams = self.CreateTDW2HDFS(getuinsID,taskId)
-            if(taskParams == None):
+            #taskParams = self.CreateTDW2HDFS(getuinsID,taskId)
+            #if(taskParams == None):
                 #mylog.MyDebugLog("CreateTDW2HDFS error")
-                return None
-            return taskParams
-            '''
+                #return None
+            return taskId
+
         except BaseException:
             ##mylog.MyErrorLog("|RequestBiz2Uin " + traceback.format_exc())
             print traceback.format_exc()
@@ -200,14 +200,14 @@ class APIWrapper_LZ:
             paramsList.append(dcitExtParam)
             dcitExtParam = {}
             #dcitExtParam["propName"] = "flag_task_partitionType"
-            #dcitExtParam["propValue"] = 'P_${YYYYMMDD}'            
+            #dcitExtParam["propValue"] = 'P_${YYYYMMDD}'
             dcitExtParam["propName"] = "partitionType"
             dcitExtParam["propValue"] = 'P_'+ str(taskId)
             paramsList.append(dcitExtParam)
             dcitExtParam = {}
             dcitExtParam["propName"] = "sourceColumnNames"
-            #dcitExtParam["propValue"] = 'bizuin,ds,flag'
-            dcitExtParam["propValue"] = 'id,tag,taskid'
+            #dcitExtParam["propValue"] = 'taskid,id,tag,flag,score'
+            dcitExtParam["propValue"] = 'taskid,id,tag,flag,score'
             paramsList.append(dcitExtParam)
             dcitExtParam = {}
             dcitExtParam["propName"] = "sourceFileNames"
@@ -227,14 +227,14 @@ class APIWrapper_LZ:
             paramsList.append(dcitExtParam)
             dcitExtParam = {}
             dcitExtParam["propName"] = "targetColumnNames"
-            dcitExtParam["propValue"] = 'id,tag,taskid'
+            dcitExtParam["propValue"] = 'taskid,id,tag,flag,score'
             paramsList.append(dcitExtParam)
 
             taskParams = APIWrapper_LZ.GetDefaultLZTaskParams()
             taskParams["parentTaskId"] ='{'+str(parentid)+':1}'
             taskParams["taskType"] = "75"
             #taskParams["taskName"] = "put_bizarticles2tdw(" + str(parentid) + ")"
-            taskParams["taskName"] = "testes2tdwa1231a" + str(random.randint(0,100));
+            taskParams["taskName"] = "testesdwa1231a" + str(random.randint(0,100));
             taskParams["taskExt"] = json.dumps(paramsList)
 
             tRespone = self.CallAPIPost(self.API_URL, taskParams)

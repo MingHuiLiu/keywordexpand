@@ -106,13 +106,16 @@ namespace wordexpand{
 			indexer.set_document(doc);
 			f.Split(" ", mseg.QuickSegement(biz.title.c_str()), v);
 			str = "";
+			/*
 			for(int i = 0; i< v.size(); i++){
 				if(v.at(i).size() >= 4){
 					str += (v.at(i) + " ");
 				}
 			}
+			*/
 			indexer.index_text(str);
 			doc.add_value(0,biz.ds);
+			doc.add_value(1,biz.title);
 			db.add_document(doc);		
 			if((linenum++)%10000 == 0){
 				db.commit();
@@ -161,10 +164,10 @@ namespace wordexpand{
 		std::vector<std::string> res ;
 		std::vector<std::string> tmp ;
 		std::map<string, string> taskinfo;
-		std::vector<bizinfo> results;		
-		//step1: query 检查,检查query结构， 参数是否完整
-
+		std::vector<bizinfo> bizresults;	
+		std::vector<articleinfo> articleresults;	
 		
+		//step1: query 检查,检查query结构， 参数是否完整		
 		//step2: query 解析
 		f.Split(",", query, v);
 		f.Split(";", conf, res);
@@ -180,13 +183,32 @@ namespace wordexpand{
 		//更新关键词表
 		UpdataKeywords(v,taskinfo);
 		UpdataKeywords(v,taskinfo);
-		if(BizRetrieval(v,results) != true){
+		if(BizRetrieval(v,bizresults) != true){
 			commom::LOG_INFO("BizRetrieval Error");
 		}
-		UpdataBiz(results, taskinfo);
-		
+		UpdataBiz(bizresults, taskinfo);
+		if(ArticleRetrieval(v,articleresults) != true){
+			commom::LOG_INFO("ArticleRetrieval Error");
+		}
 		//step4: query 组合排序、输出
-
+		string dir = "./tmpdata/";
+		string taskid = "111";
+		string str = "";
+		FILE*fo = fopen((dir + taskid).c_str(),"ab+");
+		if (fo == NULL) {
+			commom::LOG_INFO("open file error" + string(dir + taskid));
+			return false;
+		}
+		for(std::vector<bizinfo>::iterator it =  bizresults.begin(); it != bizresults.end(); it++){
+			str = taskid + string("\t") + (*it).uin + string("\t0\t1\t") +f.ConvertToStr((*it).score) + "\n";
+			f.WiteLine(str.c_str(),fo);
+		}	
+		for(std::vector<articleinfo>::iterator it = articleresults.begin(); it != articleresults.end(); it++){
+			str = taskid + string("\t") + (*it).articleuin + string("\t1\t1\t") +f.ConvertToStr((*it).score) + "\n";
+			f.WiteLine(str.c_str(),fo);
+		}	
+		fclose(fo);
+		return true;
 
 	}
 	bool Index::BizRetrieval(std::vector<string>& querylist,std::vector<bizinfo>& results){
@@ -224,6 +246,26 @@ namespace wordexpand{
 		*/
 		return true;
 	}
+
+	
+
+	bool Index::ArticleRank(Xapian::MSet& matches,std::vector<articleinfo>& results){
+		articleinfo tmp;
+		for (Xapian::MSetIterator i = matches.begin(); i != matches.end(); ++i){
+			tmp.articleuin = i.get_document().get_data();
+			tmp.title = i.get_document().get_value(1);
+			tmp.score = i.get_weight() ;
+			results.push_back(tmp);			
+		}
+		sort(results.begin(), results.end(),Bizrank);
+		int x =  results.size() < 100 ? results.size() : 100 ;
+		for(int i =0; i< x; i++){
+			commom::DEBUG_INFO(results.at(i).title + "\t" + f.ConvertToStr(results.at(i).score));
+		}
+		return true;
+	}
+
+
 
 	//filter
 	bool Index::FilerGame(string str){
@@ -279,7 +321,6 @@ namespace wordexpand{
 		return query;
 	}
 
-
 	bool Index::BizRetrieval(Xapian::Enquire& enquire, std::vector<string>& querylist,
 							std::vector<bizinfo>& results, const char* relationship){
 		Xapian::QueryParser qp;
@@ -300,7 +341,7 @@ namespace wordexpand{
 	}
 
 
-	bool Index::ArticleRetrieval(std::vector<string>& querylist,std::vector<std::pair<string, float> >& results){
+	bool Index::ArticleRetrieval(std::vector<string>& querylist,std::vector<articleinfo>& results){
 		commom::DEBUG_INFO(f.ConvertToStr(querylist.size()));
 		string P="../../data/articleindexdb/";
 		Xapian::Database db(P);
@@ -310,7 +351,7 @@ namespace wordexpand{
 		return true;
 	}
 	bool Index::ArticleRetrieval(Xapian::Enquire& enquire, std::vector<string>& querylist,
-		std::vector<std::pair<string, float> >& results, const char* relationship){
+		std::vector<articleinfo>& results, const char* relationship){
 			Xapian::QueryParser qp;
 			string query_string = "";
 			for(int i = 0; i < querylist.size(); i++){
@@ -323,10 +364,8 @@ namespace wordexpand{
 			enquire.set_query(query);
 			enquire.set_sort_by_relevance_then_value(2);
 			Xapian::MSet matches = enquire.get_mset(0, 1000000);
-			//Rank(matches,results);
-			//TestRank(matches);
+			ArticleRank(matches,results);
 			return true;
-
 	}
 	//*******************************RETREVIAL**********************************//
 

@@ -1,4 +1,4 @@
-#./index 3 ../../data/article/20160501/article ../../data/database/articleindex/20160501/ ../dict/easyseg/&
+./index 3 ../../data/article/20160501/article ../../data/database/articleindex/20160501/ ../dict/easyseg/&
 ./index 3 ../../data/article/20160502/article ../../data/database/articleindex/20160502/ ../dict/easyseg/&
 ./index 3 ../../data/article/20160503/article ../../data/database/articleindex/20160503/ ../dict/easyseg/&
 ./index 3 ../../data/article/20160504/article ../../data/database/articleindex/20160504/ ../dict/easyseg/&
@@ -18,7 +18,15 @@
 ./index 3 ../../data/article/20160518/article ../../data/database/articleindex/20160518/ ../dict/easyseg/&
 ./index 3 ../../data/article/20160519/article ../../data/database/articleindex/20160519/ ../dict/easyseg/&
 ./index 3 ../../data/article/20160520/article ../../data/database/articleindex/20160520/ ../dict/easyseg/&
-#./index 3 ../../data/article/20160521/article ../../data/database/articleindex/20160501/ ../dict/easyseg/&
-#./index 3 ../../data/article/20160522/article ../../data/database/articleindex/20160501/ ../dict/easyseg/&
+./index 3 ../../data/article/20160521/article ../../data/database/articleindex/20160521/ ../dict/easyseg/&
+./index 3 ../../data/article/20160522/article ../../data/database/articleindex/20160522/ ../dict/easyseg/&
+./index 3 ../../data/article/20160523/article ../../data/database/articleindex/20160523/ ../dict/easyseg/&
+./index 3 ../../data/article/20160524/article ../../data/database/articleindex/20160524/ ../dict/easyseg/&
+./index 3 ../../data/article/20160525/article ../../data/database/articleindex/20160525/ ../dict/easyseg/&
+./index 3 ../../data/article/20160526/article ../../data/database/articleindex/20160526/ ../dict/easyseg/&
+./index 3 ../../data/article/20160527/article ../../data/database/articleindex/20160527/ ../dict/easyseg/&
+./index 3 ../../data/article/20160528/article ../../data/database/articleindex/20160528/ ../dict/easyseg/&
+./index 3 ../../data/article/20160529/article ../../data/database/articleindex/20160529/ ../dict/easyseg/&
+
 
 
