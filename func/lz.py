@@ -33,6 +33,7 @@ class APIWrapper_LZ:
                 params = json.dumps(body_params)
             else:
                 params = urllib.urlencode(body_params)
+            #print body_params
 
             conn.request(method="POST", url=pst_url, body=params, headers=headers)
             r = conn.getresponse()
@@ -110,7 +111,7 @@ class APIWrapper_LZ:
             #taskId = str(random.randint(0,100));
             #获取此任务的唯一ID
             #taskId = str(taskId) + "_" + str(time.strftime('%Y%m%d%m%s',time.localtime(time.time())))
-            taskId = "201605311972"
+            taskId = "201605311980"
             dir = "./"
             filename = "testinput"
             #print filename
@@ -127,33 +128,41 @@ class APIWrapper_LZ:
             #return taskParams;
 
             #测试
+
             if(self.PutLocalFileToHFDS(dir,filename) == -1):
                 return None
+            '''
             add_partitionID = self.add_partition(taskId)
             if(add_partitionID == -1):
                 print "add_partition error"
                 return None
-                #上传到hdfs'''
+            '''
             #self.PutLocalFileToHFDS(dir,filename)
 
             #创建入库任务：HDFS到TDW表,
+            '''
             print "BEGIN"
-            #add_partitionID = ""
+            add_partitionID = ""
+
             print add_partitionID
             CreateHDFSToTDWId = self.CreateHDFSToTDW(filename,add_partitionID,taskId)
             if(CreateHDFSToTDWId == -1):
                 print "CreateHDFSToTDWId error"
                 return None
-            #输出到临时表daily_res_keyword_uinlis
 
+            #输出到临时表daily_res_keyword_uinlis
+            CreateHDFSToTDWId = ""
             getuinsID = self.getuins(CreateHDFSToTDWId,taskId)
             if(getuinsID == -1):
                 print "getuins error"
                 return None
-            #taskParams = self.CreateTDW2HDFS(getuinsID,taskId)
-            #if(taskParams == None):
+
+            getuinsID = ""
+            taskParams = self.CreateTDW2HDFS(getuinsID,taskId)
+            if(taskParams == None):
                 #mylog.MyDebugLog("CreateTDW2HDFS error")
-                #return None
+                return None
+            '''
             return taskId
 
         except BaseException:
@@ -302,9 +311,9 @@ class APIWrapper_LZ:
             #paramsList += str(taskId)
             #paramsList += "'}]"
             taskParams = APIWrapper_LZ.GetDefaultLZTaskParams()
-            taskParams["parentTaskId"] ='{'+str(parentid)+':1}'
+            #taskParams["parentTaskId"] ='{'+str(parentid)+':1}'
             taskParams["taskType"] = "121"
-            taskParams["taskName"] = "getuins(" + str(parentid) + ")"
+            taskParams["taskName"] = "getuin(" + str(parentid) + str(random.randint(0,100)) + ")"
             taskParams["taskExt"] = json.dumps(paramsList)
 
             tRespone = self.CallAPIPost(self.API_URL, taskParams)
@@ -359,6 +368,66 @@ class APIWrapper_LZ:
             #mylog.MyErrorLog("|PutLocalFileToHFDS error: " + traceback.format_exc())
             print traceback.format_exc()
             return -1
+
+    def CreateTDW2HDFS(self,parentid,ID):
+        try:
+            destFilePath = "/stage/outface/wxg/g_cdg_weixin/seanxywang/temp/"
+            #destFilePath = "hdfs://tl-if-nn-tdw.tencent-distribute.com:54310/stage/outface/wxg/g_cdg_weixin/susanchen/"
+            #destFileName = GetWebUser() + "_" + str(ID) + str(time.time())
+            destFileName = str(ID)
+            destFilePathName = destFilePath +destFileName
+            taskParams = APIWrapper_LZ.GetDefaultLZTaskParams()
+            taskParams["targetServer"]="hdfs_tl-if-nn-tdw.tencent-distribute.com"
+            taskParams["sourceServer"]="tdw_tl"
+            #taskParams["parentTaskId"] ='{'+str(parentid)+':1}'
+            taskParams["taskType"] = "76"
+            taskParams["taskName"] = "tdw2hdfs_"+str(time.time())+")"
+            paramsList = []
+            dcitExtParam = {}
+            dcitExtParam["propName"] = "databaseName"
+            dcitExtParam["propValue"] = 'wxg_data_valueless'
+            paramsList.append(dcitExtParam)
+            dcitExtParam = {}
+            dcitExtParam["propName"] = "destCheckFileName"
+            dcitExtParam["propValue"] = str(ID)+".check"#对账文件
+            paramsList.append(dcitExtParam)
+            dcitExtParam = {}
+            dcitExtParam["propName"] = "destCheckFilePath"
+            dcitExtParam["propValue"] = destFilePathName #对账文件路径
+            paramsList.append(dcitExtParam)
+            dcitExtParam = {}
+            dcitExtParam["propName"] = "destFileDelimiter"
+            dcitExtParam["propValue"] = "9"
+            paramsList.append(dcitExtParam)
+            dcitExtParam = {}
+            dcitExtParam["propName"] = "destFilePath"
+            dcitExtParam["propValue"] = destFilePathName
+            paramsList.append(dcitExtParam)
+
+            #taskParams["databaseName"] = "cdg_weixin"
+            #taskParams["destCheckFileName"]= str(ID)+".check"#对账文件
+            #taskParams["destCheckFilePath"] = destFilePathName #对账文件路径
+            #taskParams["destFileDelimiter"] = "\t"#目标文件分隔符
+            #taskParams["destFilePath"] = destFilePathName#目标文件路径
+            #strSQL = '''select uin,sourceid,flag FROM daily_res_keyword_uinlist where ds = '%s' '''%(ID)
+            #taskParams["filterSQL"] = strSQL
+            strSQL = '''select uin FROM wxy_daily_game_uinlist where taskid = '%s' group by uin'''%(ID)
+            dcitExtParam = {}
+            dcitExtParam["propName"] = "filterSQL"
+            dcitExtParam["propValue"] = strSQL
+            paramsList.append(dcitExtParam)
+            taskParams["taskExt"] = json.dumps(paramsList)
+            tRespone = self.CallAPIPost(self.API_URL, taskParams)
+            if(tRespone == None):return None
+            taskId = tRespone[0]["taskId"]
+            print taskId
+            taskParams["destFilePath"] = destFilePath
+            taskParams["destFileName"] = destFileName
+            return taskParams
+        except:
+            mylog.MyErrorLog("|CreateTDW2HDFS " + traceback.format_exc())
+            print traceback.format_exc()
+            return None
 if __name__ == "__main__":
     AWrapperBiz = APIWrapper_LZ()
     resp = AWrapperBiz.RequestBiz2Uin()

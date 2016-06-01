@@ -106,13 +106,11 @@ namespace wordexpand{
 			indexer.set_document(doc);
 			f.Split(" ", mseg.QuickSegement(biz.title.c_str()), v);
 			str = "";
-			/*
 			for(int i = 0; i< v.size(); i++){
 				if(v.at(i).size() >= 4){
 					str += (v.at(i) + " ");
 				}
 			}
-			*/
 			indexer.index_text(str);
 			doc.add_value(0,biz.ds);
 			doc.add_value(1,biz.title);
@@ -179,7 +177,7 @@ namespace wordexpand{
 		}
 		//step3: query 查询
 		//更新任务表
-		AddTask(taskinfo);
+		//AddTask(taskinfo);
 		//更新关键词表
 		//UpdataKeywords(v,taskinfo);
 		//UpdataKeywords(v,taskinfo);
@@ -215,6 +213,7 @@ namespace wordexpand{
 		
 		Xapian::Database db;
 		db.add_database(Xapian::Database("../../data/database/bizindex/index/"));
+		commom::DEBUG_INFO("OPEN BIZINDEX OK");
 		Xapian::Enquire enquire(db);
 		return BizRetrieval(enquire, querylist,results,"OR");
 	}
@@ -241,12 +240,10 @@ namespace wordexpand{
 			results.push_back(tmp);			
 		}
 		sort(results.begin(), results.end(),Bizrank);
-		/*
 		int x =  results.size() < 100 ? results.size() : 100 ;
 		for(int i =0; i< x; i++){
 			commom::DEBUG_INFO(results.at(i).bizname + "\t" + f.ConvertToStr(results.at(i).score));
 		}
-		*/
 		return true;
 	}
 
@@ -345,9 +342,21 @@ namespace wordexpand{
 
 
 	bool Index::ArticleRetrieval(std::vector<string>& querylist,std::vector<articleinfo>& results){
-		commom::DEBUG_INFO(f.ConvertToStr(querylist.size()));
-		string P="../../data/articleindexdb/";
-		Xapian::Database db(P);
+		Xapian::Database db;
+		//std::map<string,int> dblist;
+		//f.GetDirfile(dblist,"../../data/database/articleindex/");
+		/*
+		for(std::map<string,int>::iterator it = dblist.begin(); it != dblist.end(); it++){
+			db.add_database()
+		}
+		*/
+		
+		for(int i = 20160501; i<20160530; i++){
+			string dbpath = "../../data/database/articleindex/" + f.ConvertToStr(i) + string("/");
+			commom::DEBUG_INFO(dbpath);
+			db.add_database(Xapian::Database(dbpath.c_str()));
+		}
+		commom::DEBUG_INFO("OPEN ARTICLEINDEX OK");
 		Xapian::Enquire enquire(db);
 		commom::DEBUG_INFO("BEGIN RETRIEAL");
 		ArticleRetrieval(enquire, querylist,results,"OR");
@@ -358,15 +367,17 @@ namespace wordexpand{
 			Xapian::QueryParser qp;
 			string query_string = "";
 			for(int i = 0; i < querylist.size(); i++){
-				query_string += query_string.at(i);
+				query_string += querylist.at(i);
 				if(i+1 <querylist.size()){
 					query_string += " OR ";
 				}
 			}
+			commom::DEBUG_INFO(query_string);
 			Xapian::Query query = qp.parse_query(query_string);
 			enquire.set_query(query);
-			enquire.set_sort_by_relevance_then_value(2);
+			//enquire.set_sort_by_relevance_then_value(2);
 			Xapian::MSet matches = enquire.get_mset(0, 1000000);
+			commom::DEBUG_INFO(f.ConvertToStr(matches.size()));
 			ArticleRank(matches,results);
 			return true;
 	}
@@ -452,7 +463,7 @@ namespace wordexpand{
 		strsql += (", modify_user= " + taskinfo["modify_user"]);
 		strsql += (", create_time= " + taskinfo["create_time"]);
 		strsql += (", modify_time= " + taskinfo["modify_time"]);
-		commom::DEBUG_INFO(strsql);
+		//commom::DEBUG_INFO(strsql);
 		return ExeQuery(strsql);
 	}
 	bool Index::UpdataKeywords(std::vector<std::string>& v, std::map<string, string>& taskinfo){
@@ -468,7 +479,7 @@ namespace wordexpand{
 			strsql += (", delete_status = 0");
 			strsql += (", modify_user= " + taskinfo["modify_user"]);
 			strsql += (", modify_time= " + taskinfo["modify_time"]);
-			commom::DEBUG_INFO(strsql);
+			//commom::DEBUG_INFO(strsql);
 			ExeQuery(strsql);
 		}	
 		return true;
@@ -493,7 +504,7 @@ namespace wordexpand{
 			strsql += (", delete_status = 0");
 			strsql += (", modify_user= " + taskinfo["modify_user"]);
 			strsql += (", modify_time= " + taskinfo["modify_time"]);
-			commom::DEBUG_INFO(strsql);
+			//commom::DEBUG_INFO(strsql);
 			ExeQuery(strsql);
 		}	
 		return true;

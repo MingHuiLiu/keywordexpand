@@ -24,64 +24,34 @@ def get_article_click_uin(tdw):
     WriteLog("running=",sql)
     sql="use wxg_data_valueless"
     res = tdw.execute(sql)
-
     #article
-    sql = " SELECT * FROM wxy_sourceid_partition where taskid = '%s' and tag = 1"%taskid_
-    res = tdw.execute(sql)
-    if res is not  None:
-        idx =0
-        sql = '''insert table wxy_daily_game_uinlist
-               SELECT
-                    '%s' as taskid,
-                    uin_ as uin ,
-                    '1' as tag ,
-                    '1' as flag,
-                     1 as score
-                FROM cdg_weixin::log_10377
-                WHERE'''%(taskid_)
-        for oneArticle in res:
-            subList = oneArticle.split("\t")
-            print subList
-            articleis = subList[1].split("_")
-            if len(articleis) < 3:
-                print "<3"
-                continue
-            bizuin = articleis[0]
-            msgid = articleis[1]
-            itemidx = articleis[2]
-            if bizuin == 'READ':
-                continue
-            if idx != 0:
-                sql += " or "
-            else:
-                idx = idx + 1
-            sql += "(bizuin_=%s and msgid_=%s and itemidx_=%s)"%(bizuin,msgid,itemidx)
-        WriteLog("running=",sql)
-        res = tdw.execute(sql)
-        WriteLog("running=",sql)
+
 
     #biz
-    sql = " SELECT * FROM bizuin_partition where ds = '%s' and tag = 0"%taskid_
+    sql = " SELECT * FROM wxy_sourceid_partition where taskid = '%s' and tag = 0"%taskid_
     res = tdw.execute(sql)
     if res is not  None:
         idx =0
         sql = '''insert table wxy_daily_game_uinlist
                SELECT
                     '%s' as taskid,
-                    useruin_ as uin ,
+                    fuser_uin as uin ,
                     '0' as tag ,
                     '1' as flag,
                     1 as score
-                FROM cdg_weixin::log_10296
+                FROM cdg_weixin_secret::daily_raw_weixin_biz_user_relations
                 WHERE'''%(taskid_)
-        for oneArticle in res:
-            subList = oneArticle.split("\t")
-            id = subList[0]
+        sql += "("
+        for index in range(len(res) - 1):
+            subList = res[index].split("\t")
+            print subList
+            id = subList[1]
             if idx != 0:
                 sql += " or "
             else:
                 idx = idx + 1
-            sql += "(bizuin_=%s )"%(id)
+            sql += "(fbiz_uin=%s )"%(id)
+        sql += ") and fdate_cd = '20160529'"
         WriteLog("running=",sql)
         res = tdw.execute(sql)
 
