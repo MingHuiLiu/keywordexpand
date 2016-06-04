@@ -3,6 +3,7 @@ namespace wordexpand{
 	bool Sever::Init(const char* dictpath){
 		return true;
 	}
+	
 	void CallBack(struct evhttp_request *req, void *arg){
 		commom::DEBUG_INFO("lisenling");
 		struct evbuffer *buf = evbuffer_new();
@@ -12,10 +13,18 @@ namespace wordexpand{
 		}  	
 		char *decode_uri = strdup((char*) evhttp_request_uri(req));
 		std::cout<<decode_uri<<std::endl;
+		//Sever::test();
+		Task mTask;
+		string re = "";
+		if(mTask.TaskApi(decode_uri)){
+			re = "OK";
+		}else{
+			re = "NOOK";
+		}
 		struct evkeyvalq http_query;
 		evhttp_parse_query(decode_uri, &http_query);
 		free(decode_uri);
-		evhttp_send_reply(req, HTTP_OK, "OKOK", buf);
+		evhttp_send_reply(req, HTTP_OK, re.c_str(), buf);
 		evhttp_clear_headers(&http_query);
 		evbuffer_free(buf);
 	}
@@ -40,6 +49,7 @@ namespace wordexpand{
 			return 1;  
 		}  
 		evhttp_set_timeout(httpd, timeout);
+		//void (*cb)
 		evhttp_set_gencb(httpd, CallBack, NULL);  
 		printf("httpd server start OK!\n");  
 		event_dispatch(); 

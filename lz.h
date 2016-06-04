@@ -19,13 +19,18 @@ namespace wordexpand{
 		commom::Func f;
 		struct curl_slist *headers;
 		CURL *curl;
-		std::map<string,string>taskParams;
+		
 	public://biz
-		bool Init();
-		bool post();
+		bool Init(std::map<string,string>& inittaskParams);
+		string GetStaue(string str);
 		string LzApiPost(string params);
-		bool HDFSToTDW(const char*filename,const char* parentid,const char* taskId);
-	
+		bool LzTaskApi(string& taskid, const char* filepath);
+		bool PutLocalFileToHFDS(const char* filepath);
+		string AddPartition(string& taskid);
+		string HDFSToTDW(const char*filename,string& parentid,string& taskid);
+		string Getuins(string& parentid,string& taskid);
+		string TDW2HDFS(string& parentid,string& taskid);
+		bool ChecKLzTask(string& taskid);
 	};
 
 }

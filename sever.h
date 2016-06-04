@@ -1,6 +1,7 @@
 #ifndef _SEVER_H
 #define _SEVER_H
 #include "../commom/func.h"
+#include "task.h"
 #include <stdio.h>  
 #include <event.h>  
 #include <evhttp.h>  
@@ -20,7 +21,6 @@ namespace wordexpand{
 	public:
 		bool Init(const char* dictpath);
 		bool StartSever();
-		//void CallBack(struct evhttp_request *req, void *arg);
 	};
 
 }

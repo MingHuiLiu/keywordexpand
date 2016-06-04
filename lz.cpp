@@ -2,29 +2,29 @@
 namespace wordexpand{
 
 	//初始化索引
-	bool Lz::Init(){
-		taskParams["taskName"]="";
-		taskParams["taskType"]="75";
-		taskParams["cycleUnit"]="O";
-		taskParams["brokerIp"]="any";
-		taskParams["cycleNum"]="1";
-		taskParams["startDate"]="2015-01-01 10:00:00";
-		taskParams["endDate"]="2999-01-01 10:00:00";
-		taskParams["selfDepend"]="2";
-		taskParams["taskAction"]="";
-		taskParams["startHour"]="08";
-		taskParams["startMin"]="30";
-		taskParams["retriable"]="1";
-		taskParams["notes"]="xxxxx";
-		taskParams["inCharge"]="seanxywang";
-		taskParams["sourceServer"]="hdfs_tl-if-nn-tdw.tencent-distribute.com";
-		taskParams["targetServer"]="tdw_tl";
-		taskParams["creater"]="seanxywang";
-		taskParams["tryLimit"]="3";
-		taskParams["bgId"]="8";
-		taskParams["productId"]="304";
-		taskParams["tdwAppGroup"]="g_cdg_weixin";
-		taskParams["taskExt"]="taskExt";
+	bool Lz::Init(std::map<string,string>& inittaskParams){
+		inittaskParams["taskName"]="";
+		inittaskParams["taskType"]="75";
+		inittaskParams["cycleUnit"]="O";
+		inittaskParams["brokerIp"]="any";
+		inittaskParams["cycleNum"]="1";
+		inittaskParams["startDate"]="2015-01-01 10:00:00";
+		inittaskParams["endDate"]="2999-01-01 10:00:00";
+		inittaskParams["selfDepend"]="2";
+		inittaskParams["taskAction"]="";
+		inittaskParams["startHour"]="08";
+		inittaskParams["startMin"]="30";
+		inittaskParams["retriable"]="1";
+		inittaskParams["notes"]="xxxxx";
+		inittaskParams["inCharge"]="seanxywang";
+		inittaskParams["sourceServer"]="hdfs_tl-if-nn-tdw.tencent-distribute.com";
+		inittaskParams["targetServer"]="tdw_tl";
+		inittaskParams["creater"]="seanxywang";
+		inittaskParams["tryLimit"]="3";
+		inittaskParams["bgId"]="8";
+		inittaskParams["productId"]="304";
+		inittaskParams["tdwAppGroup"]="g_cdg_weixin";
+		inittaskParams["taskExt"]="taskExt";
 		return true;
 	}
 
@@ -48,8 +48,6 @@ namespace wordexpand{
 		return size * nmemb;
 	}
 	string Lz::LzApiPost(string params){	
-		//commom::DEBUG_INFO(params);
-		//headers = curl_slist_append(headers, "Content-Type:application/x-www-form-urlencoded; Accept: text/plain");
 		curl = curl_easy_init();    // 初始化
 		string url = "10.222.106.18:80/LService/LhotseTask";
 		struct url_data data;
@@ -57,31 +55,25 @@ namespace wordexpand{
 		data.data = (char*)malloc(4096);
 		data.data[0] = '\0';
 		if (curl){ 
-			
-			//curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);// 改协议头
-			//curl_easy_setopt(curl, CURLOPT_COOKIEFILE, "/tmp/cookie.txt"); // 指定cookie文件
-			commom::DEBUG_INFO("add post");
 			curl_easy_setopt(curl, CURLOPT_POSTFIELDS, params.c_str());    // 指定post内容
-			commom::DEBUG_INFO("set post");
 			curl_easy_setopt(curl,CURLOPT_POST,1);
-			commom::DEBUG_INFO("add url");
 			curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_data);
 			curl_easy_setopt(curl, CURLOPT_WRITEDATA, &data);
 			curl_easy_setopt(curl, CURLOPT_URL, url.c_str()); 
-			commom::DEBUG_INFO("connect post");
 			CURLcode res = curl_easy_perform(curl);
 			string str = data.data;
+			commom::DEBUG_INFO(str);
 			if(res != CURLE_OK){
 				commom::DEBUG_INFO("connect error");
 				curl_easy_cleanup(curl);
 				return "";
 			}else{
 				return str;
-			}	
-			return "";
+			}			
 		}
-
+		return "";
 	}
+
 	string ParamToStr(std::map<string,string>& dcitExtParam){
 		string str = "";
 		for(std::map<string,string>::iterator it = dcitExtParam.begin(); it != dcitExtParam.end(); it++){
@@ -100,7 +92,6 @@ namespace wordexpand{
 			}
 		}
 		return str;
-		//[{"propValue": "source2uin.py", "propName": "file_name"}, {"propValue": "201605311975", "propName": "params"}]
 	}
 	string TaskExtToStr(std::map<string,string>& dcitExtParam){
 		string str = "";
@@ -129,81 +120,146 @@ namespace wordexpand{
 		}
 		str += "]";
 		return str;
-		//[{"propValue": "source2uin.py", "propName": "file_name"}, {"propValue": "201605311975", "propName": "params"}]
 	}
-	bool Lz::HDFSToTDW(const char*filename,const char* parentid,const char* taskId){
-		//taskParams
+	string Lz::GetStaue(string str){
+		commom::DEBUG_INFO(str);
+		string copystr ="";
+		copystr.append(str,2,str.size()-4);
+		commom::DEBUG_INFO(copystr);
+		str = copystr;
+		std::vector<string> v;
+		std::vector<string> tmp;
+		std::map<string, string> dict;
+		f.Split(",", str, v);
+		commom::DEBUG_INFO(f.ConvertToStr(v.size()));
+		if(v.size() == 0){
+			return "";
+		}else{
+			for(int i =0; i< v.size(); i++){
+				f.Split(":", v.at(i),tmp);
+				if(tmp.size() == 2){
+					string firststr ="";
+					string secondstr ="";
+					firststr.append(tmp.at(0),1,tmp.at(0).size()-2);
+					secondstr.append(tmp.at(1),1,tmp.at(1).size()-2);
+					commom::DEBUG_INFO(firststr);
+					commom::DEBUG_INFO(secondstr);
+					dict[firststr] = secondstr;
+				}
+			}
+		}
+		return dict["taskId"];
+	}
+
+	bool Lz::PutLocalFileToHFDS(const char* filepath){
+		string hadooppath = "/usr/local/hadoop-0.20.1-tdw.0.2/bin/hadoop";
+		string hadooppasswd = "-Dfs.default.name=hdfs://tl-if-nn-tdw.tencent-distribute.com:54310 -Dhadoop.job.ugi=tdw_seanxywang:tdw_seanxywang,g_cdg_weixin";
+		string strremotepath = "hdfs://tl-if-nn-tdw.tencent-distribute.com:54310/stage/outface/wxg/g_cdg_weixin/seanxy/tdw/";
+		string strComPut = hadooppath + " fs " + hadooppasswd + " -put " +  string(filepath) + " " + strremotepath;
+		system(strComPut.c_str());
+		return true;
+	}
+	string Lz::AddPartition(string& taskid){
+		std::map<string,string> taskParams;
+		Init(taskParams);
+		std::map<string,string> dcitExtParam;
+		dcitExtParam["file_name"] = "add_source2uin_partition.py";
+		dcitExtParam["params"] = taskid;				
+		taskParams["taskType"] = "121";
+		taskParams["taskName"] = "add_partition:(" + taskid + ")";
+		taskParams["taskExt"] = TaskExtToStr(dcitExtParam);
+		commom::DEBUG_INFO(ParamToStr(taskParams));
+		return GetStaue(LzApiPost(ParamToStr(taskParams)));
+	}
+	string Lz::HDFSToTDW(const char*filename,string& parentid,string& taskid){
+		std::map<string,string> taskParams;
+		Init(taskParams);
 		std::map<string,string> dcitExtParam;
 		dcitExtParam["charSet"] = "UTF-8";
 		dcitExtParam["databaseName"] = "wxg_data_valueless";			
 		dcitExtParam["delimiter"] = "9";				
 		dcitExtParam["failedOnZeroWrited"] = "1";				
 		dcitExtParam["loadMode"] = "TRUNCATE";				
-		dcitExtParam["partitionType"] = "P_"+ string(taskId);		
+		dcitExtParam["partitionType"] = "P_"+ taskid;		
 		dcitExtParam["sourceColumnNames"] = "taskid,id,tag,flag,score";			
 		dcitExtParam["sourceFileNames"] = filename;					
 		dcitExtParam["sourceFilePath"] = "/stage/outface/wxg/g_cdg_weixin/seanxy/tdw/";			
 		dcitExtParam["tableName"] = "wxy_sourceid_partition";					
 		dcitExtParam["tdw"] = "tdw_tl";					
 		dcitExtParam["targetColumnNames"] = "taskid,id,tag,flag,score";	
-		//taskParams["parentTaskId"] = "{"+string(parentid)+":1}";
+		taskParams["parentTaskId"] = "{"+ parentid + ":1}";
 		taskParams["taskType"] = "75";
 		taskParams["taskName"] = parentid;
 		taskParams["taskExt"] = TaskExtToStr(dcitExtParam);
-		LzApiPost(ParamToStr(taskParams));
-		return true;
+		commom::DEBUG_INFO(ParamToStr(taskParams));
+		return GetStaue(LzApiPost(ParamToStr(taskParams)));
 	}
 
+	string Lz::Getuins(string& parentid,string& taskid){
+		std::map<string,string> taskParams;
+		Init(taskParams);
+		std::map<string,string> dcitExtParam;
+		dcitExtParam["file_name"] = "source2uin.py";
+		dcitExtParam["params"] = string(taskid);	
+		taskParams["parentTaskId"] ="{"+parentid+":1}";
+		taskParams["taskType"] = "121";
+		taskParams["taskName"] = "getuin:(" + taskid + ")";
+		taskParams["taskExt"] = TaskExtToStr(dcitExtParam);
+		commom::DEBUG_INFO(ParamToStr(taskParams));
+		return GetStaue(LzApiPost(ParamToStr(taskParams)));
+	}
 
-
+	string Lz::TDW2HDFS(string& parentid,string& taskid){
+		string destFilePath = "/stage/outface/wxg/g_cdg_weixin/seanxywang/temp/";
+		string destFileName = taskid;
+		string destFilePathName = destFilePath +destFileName;
+		std::map<string,string> taskParams;
+		Init(taskParams);
+		std::map<string,string> dcitExtParam;
+		dcitExtParam["destCheckFileName"] = taskid + ".check";
+		dcitExtParam["databaseName"] = "wxg_data_valueless";			
+		dcitExtParam["destCheckFilePath"] = destFilePathName;			
+		dcitExtParam["destFileDelimiter"] = "9";				
+		dcitExtParam["destFilePath"] = destFilePathName;	
+		string strsql = "select uin FROM wxy_daily_game_uinlist where taskid =" + taskid + "group by uin";
+		dcitExtParam["filterSQL"] = strsql;		
+		taskParams["targetServer"]="hdfs_tl-if-nn-tdw.tencent-distribute.com";
+		taskParams["sourceServer"]="tdw_tl";
+		taskParams["parentTaskId"] = "{"+string(parentid)+":1}";
+		taskParams["taskType"] = "76";
+		taskParams["taskName"] = "tdw2hdfs_" +taskid;
+		taskParams["taskExt"] = TaskExtToStr(dcitExtParam);
+		commom::DEBUG_INFO(ParamToStr(taskParams));
+		return GetStaue(LzApiPost(ParamToStr(taskParams)));
+	}
+	bool Lz::ChecKLzTask(string& taskid){
+		return true;
+	}
+	bool Lz::LzTaskApi(string& taskid, const char* filepath){
+		if(!PutLocalFileToHFDS(filepath)){
+			commom::LOG_INFO("PutLocalFileToHFDS Error");
+			return false;
+		}
+		string  addpartitionid = AddPartition(taskid);
+		if(addpartitionid == ""){
+			commom::LOG_INFO("AddPartition Error");
+			return false;
+		}
+		string hdfstotdwid = HDFSToTDW(filepath, addpartitionid,taskid);
+		if(hdfstotdwid == ""){
+			commom::LOG_INFO("HDFSToTDW Error");
+			return false;
+		}
+		string getuinsid = Getuins(hdfstotdwid, taskid);
+		if(getuinsid == ""){
+			commom::LOG_INFO("Getuins Error");
+			return false;
+		}
+		if(TDW2HDFS(getuinsid,taskid) == ""){
+			commom::LOG_INFO("TDW2HDFS Error");
+			return false;
+		}else{
+			return true;
+		}
+	}
 }
-
-/*
-char szJsonData[1024];  
-memset(szJsonData, 0, sizeof(szJsonData));  
-std::string strJson = "{";  
-strJson += "\"user_name\" : \"test\",";  
-strJson += "\"password\" : \"test123\"";  
-strJson += "}";  
-strcpy(szJsonData, strJson.c_str());  
-try   
-{  
-CURL *pCurl = NULL;  
-CURLcode res;  
-// In windows, this will init the winsock stuff  
-curl_global_init(CURL_GLOBAL_ALL);  
-
-// get a curl handle  
-pCurl = curl_easy_init();  
-if (NULL != pCurl)   
-{  
-// 设置超时时间为1秒  
-curl_easy_setopt(pCurl, CURLOPT_TIMEOUT, 1);  
-
-// First set the URL that is about to receive our POST.   
-// This URL can just as well be a   
-// https:// URL if that is what should receive the data.  
-curl_easy_setopt(pCurl, CURLOPT_URL, "http://192.168.0.2/posttest.svc");  
-//curl_easy_setopt(pCurl, CURLOPT_URL, "http://192.168.0.2/posttest.cgi");  
-
-// 设置http发送的内容类型为JSON  
-curl_slist *plist = curl_slist_append(NULL,   
-"Content-Type:application/json;charset=UTF-8");  
-curl_easy_setopt(pCurl, CURLOPT_HTTPHEADER, plist);  
-
-// 设置要POST的JSON数据  
-curl_easy_setopt(pCurl, CURLOPT_POSTFIELDS, szJsonData);  
-
-// Perform the request, res will get the return code   
-res = curl_easy_perform(pCurl);  
-// Check for errors  
-if (res != CURLE_OK)   
-{  
-printf("curl_easy_perform() failed:%s\n", curl_easy_strerror(res));  
-}  
-// always cleanup  
-curl_easy_cleanup(pCurl);  
-}  
-curl_global_cleanup();  
-}  
-*/
