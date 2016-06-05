@@ -1,6 +1,7 @@
 #ifndef _LZ_H
 #define _LZ_H
 #include <stdio.h>
+#include "sql.h"
 #include <curl/curl.h>
 #include "../commom/func.h"
 struct url_data {
@@ -11,11 +12,13 @@ namespace wordexpand{
  class Lz{
 	public:
 		Lz(){
+			mySql.InitMysql();
 			headers = NULL;
 			curl = NULL;
 		}
 		~Lz(){}
 	public://biz
+		Sql mySql;
 		commom::Func f;
 		struct curl_slist *headers;
 		CURL *curl;

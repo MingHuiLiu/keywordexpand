@@ -11,6 +11,7 @@ namespace wordexpand{
 	}
 
 	bool Sql::ExeQuery(string& query){
+		//commom::DEBUG_INFO(query);
 		if(mysql_query(&myCont, query.c_str())){  
 			commom::LOG_INFO("Query Error:" + string(mysql_error(&myCont)));
 			return false;
@@ -106,21 +107,22 @@ namespace wordexpand{
 		return id + 1;
 	}
 
-	bool Sql::AddTask(string& taskid, string& lzid){
+	bool Sql::AddTask(string taskid, string lzid){
 		string strsql = "";
-		strsql += "insert into task_staue set ";
-		strsql += ("task_id= " + taskid);
+		strsql += "insert into lz_task_staue set ";
+		strsql += ("taskid= " + taskid);
 		strsql += (", ds= \" \"");
 		strsql += (", lzid= " + lzid);
-		strsql += (", uinnum=  0");
-		strsql += (", taskstaue= \"0\"");
-		//commom::DEBUG_INFO(strsql);
+		strsql += (", uinnumber=  0");
+		strsql += (", staue= \"0\"");
+		commom::DEBUG_INFO(strsql);
 		return ExeQuery(strsql);
 	}
 
 	bool Sql::SelectTask(std::vector<taskstaue>& tasklist){
+		commom::DEBUG_INFO("SelectTask");
 		int id = 0;
-		string sqlstr = "select * from task_staue where staue != \"4\"";
+		string sqlstr = "select * from lz_task_staue where staue != \"4\"";
 		ExeQuery(sqlstr);
 		MYSQL_RES *result = mysql_use_result(&myCont);
 		MYSQL_ROW row;  
@@ -141,13 +143,13 @@ namespace wordexpand{
 		return true;
 	}
 
-	bool Sql::UpdataTask(string& taskid, string& staue){
+	bool Sql::UpdataTask(string taskid, string staue){
 		//update MyClass set name='Mary' where id=1;
 		string strsql = "";
-		strsql += "update  task_staue set ";
-		strsql += ("taskstaue= " + staue);
-		strsql += ("where taskid = " + taskid);
-		//commom::DEBUG_INFO(strsql);
+		strsql += "update  lz_task_staue set ";
+		strsql += ("staue=" + staue);
+		strsql += (" where taskid =" + taskid);
+		commom::DEBUG_INFO(strsql);
 		return ExeQuery(strsql);
 	}
 }

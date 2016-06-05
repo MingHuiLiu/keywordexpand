@@ -210,7 +210,7 @@ namespace wordexpand{
 	}
 
 	string Lz::TDW2HDFS(string& parentid,string& taskid){
-		string destFilePath = "/stage/outface/wxg/g_cdg_weixin/seanxywang/temp/";
+		string destFilePath = "/stage/outface/wxg/g_cdg_weixin/seanxy/tdw/out/";
 		string destFileName = taskid;
 		string destFilePathName = destFilePath +destFileName;
 		std::map<string,string> taskParams;
@@ -221,7 +221,7 @@ namespace wordexpand{
 		dcitExtParam["destCheckFilePath"] = destFilePathName;			
 		dcitExtParam["destFileDelimiter"] = "9";				
 		dcitExtParam["destFilePath"] = destFilePathName;	
-		string strsql = "select uin FROM wxy_daily_game_uinlist where taskid =" + taskid + "group by uin";
+		string strsql = "select uin FROM wxy_daily_game_uinlist where taskid =" + taskid + " group by uin";
 		dcitExtParam["filterSQL"] = strsql;		
 		taskParams["targetServer"]="hdfs_tl-if-nn-tdw.tencent-distribute.com";
 		taskParams["sourceServer"]="tdw_tl";
@@ -255,11 +255,12 @@ namespace wordexpand{
 			commom::LOG_INFO("Getuins Error");
 			return false;
 		}
-		if(TDW2HDFS(getuinsid,taskid) == ""){
+		string lzid = TDW2HDFS(getuinsid,taskid);
+		if(lzid == ""){
 			commom::LOG_INFO("TDW2HDFS Error");
 			return false;
 		}else{
-			return true;
+			return mySql.AddTask(taskid,lzid);
 		}
 	}
 }

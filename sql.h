@@ -55,9 +55,9 @@ namespace wordexpand{
 		bool UpdataArticle();
 		int GetTaskId();
 	public://数据状态表操作
-		bool AddTask(string& taskid, string& lzid);
+		bool AddTask(string taskid, string lzid);
 		bool SelectTask(std::vector<taskstaue>& tasklist);
-		bool UpdataTask(string& taskid, string& staue);
+		bool UpdataTask(string taskid, string staue);
 
 	};
 }

@@ -15,11 +15,11 @@ namespace wordexpand{
 		Lz myLz;
 		commom::Func f;
 	public:
-		bool Init(const char* dictpath);
-		bool CheckLz(string& taskid);
-		bool HdfsToLocal(string& taskid);
-		bool Process(string& taskid);
-		bool Send(string& taskid);
+		bool Init();
+		bool CheckLz(string taskid);
+		bool HdfsToLocal(string taskid);
+		bool Process(string taskid);
+		bool Send(string taskid);
 		bool CheckTask();
 	};
 

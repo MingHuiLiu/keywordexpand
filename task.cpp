@@ -117,7 +117,7 @@ namespace wordexpand{
 	bool Task::TaskApi(const char* str){
 		if(ArgumentParsing(str) != true){
 			commom::LOG_INFO("ArgumentParsing error");
-			return false;
+			//return false;
 		}
 		string query = "";
 		std::map<string, string> taskinfo;
