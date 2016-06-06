@@ -21,7 +21,7 @@ namespace wordexpand{
 		bool InitRetrieval(const char* dictpath);
 		bool BizIndex(const char* filein, const char* dbpath);
 		bool ArticleIndex(const char* filein, const char* dbpath);
-		bool Retrieval(Sql& mySql,string& query,std::map<string, string>& taskinfo,
+		bool Retrieval(string& source, string& query,Sql& mySql,std::map<string, string>& taskinfo,
 				std::vector<bizinfo>& bizresults,
 				std::vector<articleinfo>& articleresults);
 		bool BizRetrieval(std::vector<string>& querylist,std::vector<bizinfo>& results);

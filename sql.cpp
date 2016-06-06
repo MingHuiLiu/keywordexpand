@@ -107,20 +107,20 @@ namespace wordexpand{
 		return id + 1;
 	}
 
-	bool Sql::AddTask(string taskid, string lzid){
+	bool Sql::AddTask(string taskid, string lzid,string& uinnumber){
 		string strsql = "";
 		strsql += "insert into lz_task_staue set ";
 		strsql += ("taskid= " + taskid);
-		strsql += (", ds= \" \"");
+		strsql += (", ds= " + f.GetTime());
 		strsql += (", lzid= " + lzid);
-		strsql += (", uinnumber=  0");
+		strsql += (", uinnumber= " + uinnumber);
 		strsql += (", staue= \"0\"");
 		commom::DEBUG_INFO(strsql);
 		return ExeQuery(strsql);
 	}
 
 	bool Sql::SelectTask(std::vector<taskstaue>& tasklist){
-		commom::DEBUG_INFO("SelectTask");
+		//commom::DEBUG_INFO("SelectTask");
 		int id = 0;
 		string sqlstr = "select * from lz_task_staue where staue != \"4\"";
 		ExeQuery(sqlstr);

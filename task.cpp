@@ -32,7 +32,10 @@ namespace wordexpand{
 		taskid = "20160602" +  f.ConvertToStr(mySql.GetTaskId());
 		commom::DEBUG_INFO("taskid : " + taskid);
 		//query = inputconf.keywds;
-		query = str;
+		//query = str;
+		inputconf.keywds = str;
+		inputconf.source = "2";
+		inputconf.num = "20";
 		string conf = "";
 		conf += ("task_id:" + f.ConvertToStr(mySql.GetTaskId()));
 		conf += ";";
@@ -76,9 +79,9 @@ namespace wordexpand{
 	}
 
 	//检索
-	bool Task::Retrieval(string& query,std::map<string, string>& taskinfo){
+	bool Task::Retrieval(std::map<string, string>& taskinfo){
 		commom::DEBUG_INFO("Begin Retrieval");
-		mindex.Retrieval(mySql,query, taskinfo, bizresults, articleresults);
+		mindex.Retrieval(inputconf.source,inputconf.keywds,mySql, taskinfo, bizresults, articleresults);
 		return true;
 	}
 
@@ -110,7 +113,7 @@ namespace wordexpand{
 	//LZ接口
 	bool Task::CallLz(){
 		commom::DEBUG_INFO("CallLz Api");
-		mlz.LzTaskApi(taskid, (localfiledir+taskid).c_str());
+		mlz.LzTaskApi(taskid, (localfiledir+taskid).c_str(),inputconf.num);
 		return true;
 	}
 
@@ -122,7 +125,7 @@ namespace wordexpand{
 		string query = "";
 		std::map<string, string> taskinfo;
 		Config(query, taskinfo);
-		Retrieval(query,taskinfo);
+		Retrieval(taskinfo);
 		UinToFile();
 		CallLz();
 	}

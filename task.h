@@ -9,7 +9,7 @@ typedef struct{
 	string keywds;
 	string source;
 	string num;
-}confinfo; 
+}confignfo; 
 namespace wordexpand{
 	class Task{
 	public:
@@ -22,14 +22,14 @@ namespace wordexpand{
 		commom::Func f;
 	public:
 		string taskid;
-		confinfo inputconf;	
+		confignfo inputconf;	
 		string localfiledir;
 		std::vector<bizinfo> bizresults;
 		std::vector<articleinfo> articleresults;
 	public:
 		bool ArgumentParsing(const char* str);
 		bool Config(string& query,std::map<string, string>& taskinfo);
-		bool Retrieval(string& query,std::map<string, string>& taskinfo);
+		bool Retrieval(std::map<string, string>& taskinfo);
 		bool Rank();
 		bool UinToFile();
 		bool CallLz();

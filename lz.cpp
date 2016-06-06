@@ -235,7 +235,7 @@ namespace wordexpand{
 	bool Lz::ChecKLzTask(string& taskid){
 		return true;
 	}
-	bool Lz::LzTaskApi(string& taskid, const char* filepath){
+	bool Lz::LzTaskApi(string& taskid, const char* filepath,string& uinnumber){
 		if(!PutLocalFileToHFDS(filepath)){
 			commom::LOG_INFO("PutLocalFileToHFDS Error");
 			return false;
@@ -260,7 +260,7 @@ namespace wordexpand{
 			commom::LOG_INFO("TDW2HDFS Error");
 			return false;
 		}else{
-			return mySql.AddTask(taskid,lzid);
+			return mySql.AddTask(taskid,lzid,uinnumber);
 		}
 	}
 }

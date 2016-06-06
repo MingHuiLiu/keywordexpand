@@ -55,8 +55,7 @@ namespace wordexpand{
 			doc.set_data(biz.uin);	
 			indexer.set_document(doc);
 			indexer.index_text(mseg.QuickSegement(biz.bizname.c_str()), 1, "T");
-			indexer.index_text(mseg.QuickSegement(biz.bizdesc.c_str()), 1, "C");	
-			
+			indexer.index_text(mseg.QuickSegement(biz.bizdesc.c_str()), 1, "C");			
 			/*
 			for (Xapian::TermIterator iter = doc.termlist_begin(); iter != doc.termlist_end(); ++iter){
 				std::cout<<*iter<<std::endl;
@@ -123,7 +122,7 @@ namespace wordexpand{
 	//*******************************INDEX**************************************//
 
 	//*******************************RETREVIAL**********************************//
-	bool Index::Retrieval(Sql& mySql,string& query,std::map<string, string>& taskinfo,
+	bool Index::Retrieval(string& source, string& query,Sql& mySql,std::map<string, string>& taskinfo,
 		std::vector<bizinfo>& bizresults,
 		std::vector<articleinfo>& articleresults){
 		std::vector<std::string> v ;
@@ -135,15 +134,27 @@ namespace wordexpand{
 		mySql.AddTask(taskinfo);
 		//更新关键词表
 		//UpdataKeywords(v,taskinfo);
-		if(BizRetrieval(v,bizresults) != true){
-			commom::LOG_INFO("BizRetrieval Error");
-		}
-		//UpdataBiz(bizresults, taskinfo);
-		if(ArticleRetrieval(v,articleresults) != true){
-			commom::LOG_INFO("ArticleRetrieval Error");
-		}
-		//step4: query 组合排序、输出
 
+		//选择内容源
+		if(source == "0"){
+			if(BizRetrieval(v,bizresults) != true){
+				commom::LOG_INFO("BizRetrieval Error");
+			}
+		}else if(source == "1"){
+			if(ArticleRetrieval(v,articleresults) != true){
+				commom::LOG_INFO("ArticleRetrieval Error");
+			}
+		}else if(source == "2"){
+			if(BizRetrieval(v,bizresults) != true){
+				commom::LOG_INFO("BizRetrieval Error");
+			}
+			if(ArticleRetrieval(v,articleresults) != true){
+				commom::LOG_INFO("ArticleRetrieval Error");
+			}
+		}
+		
+		//UpdataBiz(bizresults, taskinfo);		
+		//step4: query 组合排序、输出
 		return true;
 
 	}
@@ -185,8 +196,7 @@ namespace wordexpand{
 		return true;
 	}
 
-	
-
+	//文章排序
 	bool Index::ArticleRank(Xapian::MSet& matches,std::vector<articleinfo>& results){
 		articleinfo tmp;
 		for (Xapian::MSetIterator i = matches.begin(); i != matches.end(); ++i){
@@ -202,9 +212,6 @@ namespace wordexpand{
 		}
 		return true;
 	}
-
-
-
 	//filter
 	bool Index::FilerGame(string str){
 		std::vector<std::string> v ;

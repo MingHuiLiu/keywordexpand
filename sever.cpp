@@ -17,9 +17,9 @@ namespace wordexpand{
 		Task mTask;
 		string re = "";
 		if(mTask.TaskApi(decode_uri)){
-			re = "OK";
+			re = "0";
 		}else{
-			re = "NOOK";
+			re = "-1";
 		}
 		struct evkeyvalq http_query;
 		evhttp_parse_query(decode_uri, &http_query);
@@ -32,7 +32,7 @@ namespace wordexpand{
 		commom::DEBUG_INFO("begin");
 		char *host_ip = "10.223.48.117";
 		int host_port = 9091;
-		int timeout = 3;
+		int timeout = 300;
 		struct evhttp *httpd;  
 		/*
 		WSADATA wsaData;  

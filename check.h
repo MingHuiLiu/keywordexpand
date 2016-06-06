@@ -18,7 +18,7 @@ namespace wordexpand{
 		bool Init();
 		bool CheckLz(string taskid);
 		bool HdfsToLocal(string taskid);
-		bool Process(string taskid);
+		bool Process(string taskid,string uinnumber);
 		bool Send(string taskid);
 		bool CheckTask();
 	};
