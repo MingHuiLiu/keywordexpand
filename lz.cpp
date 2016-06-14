@@ -73,6 +73,53 @@ namespace wordexpand{
 		}
 		return "";
 	}
+	string Lz::SendUinStauePost(string& taskid,string& real_magnitude,string& package_path){
+		string params = "taskid=";
+		params += taskid;
+		params +="&real_magnitude=";
+		params += real_magnitude;
+		params +="&package_path=";
+		params += package_path;
+		commom::DEBUG_INFO(params);
+		curl = curl_easy_init();    // 初始化
+		//string url = "10.123.98.16:14748/packagenotify?sign=wx312121&applyer=jimxfzhu";
+		//string url = "10.123.98.16:14748/packagenotify/";
+		string url = "10.191.130.34:14748/cgi-bin/packagenotify";
+		//10.191.130.34:14748
+		struct url_data data;
+		data.size = 0;
+		data.data = (char*)malloc(4096);
+		data.data[0] = '\0';
+		if (curl){ 
+			curl_easy_setopt(curl, CURLOPT_POSTFIELDS, params.c_str());    // 指定post内容
+			curl_easy_setopt(curl,CURLOPT_POST,1);
+			curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_data);
+			curl_easy_setopt(curl, CURLOPT_WRITEDATA, &data);
+			curl_easy_setopt(curl, CURLOPT_URL, url.c_str()); 
+			CURLcode res = curl_easy_perform(curl);
+			string str = data.data;
+			commom::DEBUG_INFO("RETURN: " + str);
+			if(res != CURLE_OK){
+				commom::DEBUG_INFO("connect error");
+				curl_easy_cleanup(curl);
+				//curl_global_cleanup();
+				return "";
+			}else{
+				commom::DEBUG_INFO("OK");
+				//curl_global_cleanup();
+				return str;
+			}			
+		}
+		//curl_global_cleanup();
+		return "";
+	}
+
+	bool Lz::SendUinStaue(string& taskid,string real_magnitude,string& package_path){		
+		if(SendUinStauePost(taskid,real_magnitude,package_path) == ""){
+			return false;
+		}
+		return true;
+	}
 
 	string ParamToStr(std::map<string,string>& dcitExtParam){
 		string str = "";
@@ -221,7 +268,7 @@ namespace wordexpand{
 		dcitExtParam["destCheckFilePath"] = destFilePathName;			
 		dcitExtParam["destFileDelimiter"] = "9";				
 		dcitExtParam["destFilePath"] = destFilePathName;	
-		string strsql = "select uin FROM wxy_daily_game_uinlist where taskid =" + taskid + " group by uin";
+		string strsql = "select uin,tag,count(1) FROM wxy_daily_game_uinlist where taskid =" + taskid + " group by uin,tag";
 		dcitExtParam["filterSQL"] = strsql;		
 		taskParams["targetServer"]="hdfs_tl-if-nn-tdw.tencent-distribute.com";
 		taskParams["sourceServer"]="tdw_tl";
@@ -238,6 +285,7 @@ namespace wordexpand{
 	bool Lz::LzTaskApi(string& taskid, const char* filepath,string& uinnumber){
 		if(!PutLocalFileToHFDS(filepath)){
 			commom::LOG_INFO("PutLocalFileToHFDS Error");
+			mylog.LOG(taskid,"DEBUG_INFO : PutLocalFileToHFDS Error");
 			return false;
 		}
 		string  addpartitionid = AddPartition(taskid);

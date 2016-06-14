@@ -113,7 +113,7 @@ namespace wordexpand{
 		strsql += ("taskid= " + taskid);
 		strsql += (", ds= " + f.GetTime());
 		strsql += (", lzid= " + lzid);
-		strsql += (", uinnumber= " + uinnumber);
+		strsql += (", uinnumber= \"" + uinnumber + "\"");
 		strsql += (", staue= \"0\"");
 		commom::DEBUG_INFO(strsql);
 		return ExeQuery(strsql);

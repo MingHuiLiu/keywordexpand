@@ -28,13 +28,13 @@ class APIWrapper_LZ:
             headers = {"Content-Type":"application/x-www-form-urlencoded", "Accept": "text/plain"}
             if host_port == "": host_port = "10.222.106.18:80" #host_port = "lhotse-yh-appcgi:8081" #"10.136.4.90:8081"
             conn = httplib.HTTPConnection(host_port)
-
+            print body_params
             if bJson:
                 params = json.dumps(body_params)
             else:
                 params = urllib.urlencode(body_params)
             #print body_params
-
+            print params
             conn.request(method="POST", url=pst_url, body=params, headers=headers)
             r = conn.getresponse()
             if (r.status == 200):
@@ -111,7 +111,9 @@ class APIWrapper_LZ:
             #taskId = str(random.randint(0,100));
             #获取此任务的唯一ID
             #taskId = str(taskId) + "_" + str(time.strftime('%Y%m%d%m%s',time.localtime(time.time())))
-            taskId = "201605311980"
+            taskId = "20160531198011"
+            '''
+
             dir = "./"
             filename = "testinput"
             #print filename
@@ -136,7 +138,6 @@ class APIWrapper_LZ:
             if(add_partitionID == -1):
                 print "add_partition error"
                 return None
-            '''
             #self.PutLocalFileToHFDS(dir,filename)
 
             #创建入库任务：HDFS到TDW表,

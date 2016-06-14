@@ -1,9 +1,17 @@
 #include "task.h"
 namespace wordexpand{
 	Task::Task(){
+		desc = "SUCESS";
+		taskid = "";
+		inputconf.id = "";
+		inputconf.keywds = "";
+		inputconf.source = "";
+		inputconf.num = "";
 		localfiledir = "./tmpdata/";
+		//mylog.Init("./log/");
 		mySql.InitMysql();
 		mindex.InitRetrieval("../dict/easyseg/");
+		
 	}
 	Task::~Task(){
 		bizresults.clear();
@@ -12,30 +20,98 @@ namespace wordexpand{
 	//参数解析
 	bool Task::ArgumentParsing(const char* str){
 		//taskid=201606021814&keywords=游戏 美丽&souce=1&number=1000
-		commom::DEBUG_INFO(str);
-		return false;
+		string confstr = str;
+		commom::DEBUG_INFO("confstr :" + confstr);
+		//mylog.LOG(taskid,("INPUTPARAM :" + string(confstr) + "\n").c_str());
+		std::vector<string> v;
+		std::vector<string> tmp;
+		std::map<string,string>dict;
+		f.Split("&", confstr, v);
+		if(v.size() != 4){
+			desc = "param number error!";
+			return false;
+		}else{
+			for(int j =0; j < v.size(); j++){
+				string ss = v.at(j);
+				f.Split("=",ss,tmp);
+				if(tmp.size() != 2){
+					desc = "param wrong!";
+					return false;
+				}else{
+					dict[tmp.at(0)] = tmp.at(1);
+				}
+				commom::LOG_INFO(v.at(j));
+			}
+
+		}
+		//
+		if(dict["code"] != "13BCF8DE22DB318A01EF4172AA0C199A"){
+			desc = "passcode error!";
+			//mylog.LOG(taskid,("ERROR :" + desc + "\n").c_str());
+			return false;
+		}
+		string keywd = dict["keywd"];
+		//
+		keywd = "英雄联盟";
+		if(keywd == ""){
+			desc = "keywd error!";
+			//mylog.LOG(taskid,("ERROR :" + desc + "\n").c_str());
+			return false;
+		}
+		f.Split("_",keywd,tmp);
+		if(tmp.size() < 1){
+			desc = "keywd error!";
+			//mylog.LOG(taskid,("ERROR :" + desc + "\n").c_str());
+			return false;
+		}
+		if((dict["source"].size() <0)||(dict["source"].size() >3)){
+			desc = "source error!";
+			//mylog.LOG(taskid,("ERROR :" + desc + "\n").c_str());
+			return false;
+		}
+		if(dict["source"].find("1") != string::npos){
+			inputconf.source += "1";
+		}else{
+			inputconf.source += "0";
+		}
+		if(dict["source"].find("2") != string::npos){
+			inputconf.source += "1";
+		}else{
+			inputconf.source += "0";
+		}
+		if(dict["source"].find("4") != string::npos){
+			inputconf.source += "1";
+		}else{
+			inputconf.source += "0";
+		}
+		if(inputconf.source.size() != 3){
+			desc = "source error!";
+			//mylog.LOG(taskid,("ERROR :" + desc + "\n").c_str());
+			return false;
+		}
+		if(dict["uinnumber"] == ""){
+
+		}else if((atoi(dict["uinnumber"].c_str()) == 0)||(atoi(dict["uinnumber"].c_str()) > 10000*10000)){
+			desc = "uinnumber error!";
+			//mylog.LOG(taskid,("ERROR :" + desc + "\n").c_str());
+			return false;
+		}
+		taskid = f.GetDate() +  f.ConvertToStr(mySql.GetTaskId());
+		commom::DEBUG_INFO("taskid : " + taskid);
+		inputconf.id = taskid;
+		inputconf.keywds = keywd;
+		//inputconf.source = dict["source"];
+		inputconf.num =dict["uinnumber"];
+		commom::LOG_INFO(inputconf.id);
+		commom::LOG_INFO(inputconf.keywds);
+		commom::LOG_INFO(inputconf.source);
+		commom::LOG_INFO(inputconf.num);
+		return true;
 	}
 	//参数设置
 	bool Task::Config(string& query,std::map<string, string>& taskinfo){	
 		//解析传入参数
 		commom::DEBUG_INFO("Config");
-		FILE*fi  = fopen("./input","r");
-		if (fi == NULL) {
-			commom::LOG_INFO("open file error");
-			return false;
-		}		
-		std::string str = "";
-		char buffer[MAX_LENTH];		
-		while ( f.ReadLine(buffer,MAX_LENTH,fi)!=NULL)	{
-			str = f.GetLine(buffer);
-		}
-		taskid = "20160602" +  f.ConvertToStr(mySql.GetTaskId());
-		commom::DEBUG_INFO("taskid : " + taskid);
-		//query = inputconf.keywds;
-		//query = str;
-		inputconf.keywds = str;
-		inputconf.source = "2";
-		inputconf.num = "20";
 		string conf = "";
 		conf += ("task_id:" + f.ConvertToStr(mySql.GetTaskId()));
 		conf += ";";
@@ -81,8 +157,8 @@ namespace wordexpand{
 	//检索
 	bool Task::Retrieval(std::map<string, string>& taskinfo){
 		commom::DEBUG_INFO("Begin Retrieval");
-		mindex.Retrieval(inputconf.source,inputconf.keywds,mySql, taskinfo, bizresults, articleresults);
-		return true;
+		//mylog.LOG(taskid,"DEBUG_INFO : Begin Retrieval ");
+		return mindex.Retrieval(inputconf.source,inputconf.keywds,mySql, taskinfo, bizresults, articleresults);
 	}
 
 	//排序
@@ -92,6 +168,7 @@ namespace wordexpand{
 	//读写文件
 	bool Task::UinToFile(){
 		commom::DEBUG_INFO("Begin UinToFile");
+		//mylog.LOG(taskid,"DEBUG_INFO : Begin UinToFile ");
 		string str = "";
 		FILE*fo = fopen((localfiledir + taskid).c_str(),"ab+");
 		if (fo == NULL) {
@@ -113,6 +190,8 @@ namespace wordexpand{
 	//LZ接口
 	bool Task::CallLz(){
 		commom::DEBUG_INFO("CallLz Api");
+		//mylog.LOG(taskid,"DEBUG_INFO : CallLz Api ");
+		//mylog.~Log();
 		mlz.LzTaskApi(taskid, (localfiledir+taskid).c_str(),inputconf.num);
 		return true;
 	}
@@ -120,14 +199,31 @@ namespace wordexpand{
 	bool Task::TaskApi(const char* str){
 		if(ArgumentParsing(str) != true){
 			commom::LOG_INFO("ArgumentParsing error");
-			//return false;
+			//mylog.LOG(taskid,"DEBUG_INFO : ArgumentParsing error");
+			return false;
 		}
+		//mylog.LOG(taskid,"DEBUG_INFO : ArgumentParsing OK");
 		string query = "";
 		std::map<string, string> taskinfo;
-		Config(query, taskinfo);
-		Retrieval(taskinfo);
-		UinToFile();
-		CallLz();
+		if(!Config(query, taskinfo)){
+			commom::LOG_INFO("Config error");
+			//mylog.LOG(taskid,"DEBUG_INFO : Config error");
+			return false;
+		}
+		//mylog.LOG(taskid,"DEBUG_INFO : Config OK");
+		if(!Retrieval(taskinfo)){
+			commom::LOG_INFO("Retrieval error");
+			//mylog.LOG(taskid,"DEBUG_INFO : Retrieval error");
+			return false;
+		}
+		//mylog.LOG(taskid,"DEBUG_INFO : Retrieval OK");
+		if(!UinToFile()){
+			commom::LOG_INFO("UinToFile error");
+			//mylog.LOG(taskid,"DEBUG_INFO : UinToFile error");
+			return false;
+		}
+		//mylog.LOG(taskid,"DEBUG_INFO : UinToFile OK");
+		return CallLz();
 	}
 
 }

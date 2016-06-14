@@ -22,8 +22,7 @@ int main(int argc, char *argv[]) {
 	wordexpand::Sever mysever;
 	mysever.StartSever();
 	//wordexpand::Lz mlz;
-	//mlz.Init();
-	//mlz.HDFSToTDW(argv[1], argv[2], argv[3]);
+	//mlz.SendUinStauePost();
 	//wordexpand::Task mtask;
 	//mtask.TaskApi(argv[1]);
 	return 0;

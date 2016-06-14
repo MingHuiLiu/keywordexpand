@@ -2,6 +2,8 @@
 namespace wordexpand{
 	Check::Check(){
 		Init();
+		//uinsize = 0;
+		path = "";
 	}
 	Check::~Check(){}
 	bool Check::Init(){
@@ -14,13 +16,12 @@ namespace wordexpand{
 		string hadooppasswd = "-Dfs.default.name=hdfs://tl-if-nn-tdw.tencent-distribute.com:54310 -Dhadoop.job.ugi=tdw_seanxywang:tdw_seanxywang,g_cdg_weixin";
 		string strremotepath = "hdfs://tl-if-nn-tdw.tencent-distribute.com:54310/stage/outface/wxg/g_cdg_weixin/seanxy/tdw/out/" + taskid + "/*.check";
 		string strComGet = hadooppath + " fs " + hadooppasswd + " -get "  + " " + strremotepath + " " + PATH + taskid + ".check";
-		//commom::DEBUG_INFO(strComGet);
-		system(strComGet.c_str());
+		commom::LOG_INFO("SYSTEM :" + f.ConvertToStr(system(strComGet.c_str())));
+		
 		string filein =  PATH + taskid + ".check";
-		//commom::DEBUG_INFO(filein);
 		FILE*fi = fopen(filein.c_str(),"r");
 		if (fi != NULL) {
-			commom::DEBUG_INFO("updata");
+			//commom::DEBUG_INFO("updata");
 			mySql.UpdataTask(taskid,string("1"));
 			fclose(fi);
 			string strrm = "rm -rf ./data/" + taskid + ".check";
@@ -37,11 +38,12 @@ namespace wordexpand{
 		string strremotepath = "hdfs://tl-if-nn-tdw.tencent-distribute.com:54310/stage/outface/wxg/g_cdg_weixin/seanxy/tdw/out/" + taskid + "/attempt*";
 		string strremotepathcheck = "hdfs://tl-if-nn-tdw.tencent-distribute.com:54310/stage/outface/wxg/g_cdg_weixin/seanxy/tdw/out/" + taskid + "/" + taskid + ".check";
 		string strComGet = hadooppath + " fs " + hadooppasswd + " -get "  + " " + strremotepath + " " + PATH + taskid + ".temp";
-		commom::DEBUG_INFO(strComGet);
-		system(strComGet.c_str());
+		//commom::DEBUG_INFO(strComGet);
+		commom::LOG_INFO("SYSTEM :" + f.ConvertToStr(system(strComGet.c_str())));
+
 		strComGet = hadooppath + " fs " + hadooppasswd + " -get "  + " " + strremotepathcheck + " " + PATH;
-		commom::DEBUG_INFO(strComGet);
-		system(strComGet.c_str());
+		//commom::DEBUG_INFO(strComGet);
+		commom::LOG_INFO("SYSTEM :" + f.ConvertToStr(system(strComGet.c_str())));
 		mySql.UpdataTask(taskid,string("2"));
 		return true;
 	}
@@ -56,23 +58,125 @@ namespace wordexpand{
 			mySql.UpdataTask(taskid,string("2"));
 			return false;
 		}		
+		uininfo tmp;
+		std::map<string,uininfo>dict;
 		std::string str = "";
+		std::vector<string>v;
 		char buffer[MAX_LENTH];	
 		while ( f.ReadLine(buffer,MAX_LENTH,fi)!=NULL)	{
-			str = f.GetLine(buffer) + "\n";
-			f.WiteLine(str.c_str(), fo);
+			str = f.GetLine(buffer);
+			f.Split("\t",str,v);
+			if(v.size() != 3)continue;
+			tmp.tag= v.at(1);
+			tmp.flag = "1";
+			tmp.score = atof(v.at(2).c_str());
+			if(dict.find(v.at(0)) == dict.end()){
+				dict[v.at(0)] = tmp;
+			}else{
+				dict[v.at(0)].tag = "2";
+				dict[v.at(0)].score += tmp.score;
+			}
 		}
+		commom::LOG_INFO(f.ConvertToStr(dict.size()));
+
+
+		int linenumber = 0;
+		int uinnum = 0;
+		if(uinnumber != ""){
+			uinnum = atoi(uinnumber.c_str());
+		}		
+
+		if(uinnum == 0){
+			while ( f.ReadLine(buffer,MAX_LENTH,fi)!=NULL)	{
+				linenumber++ ;
+				str = f.GetLine(buffer) + "\n";
+				f.WiteLine(str.c_str(), fo);
+			}
+		}else{
+			while ( f.ReadLine(buffer,MAX_LENTH,fi)!=NULL)	{
+				str = f.GetLine(buffer) + "\n";
+				if(linenumber++ < uinnum){
+					f.WiteLine(str.c_str(), fo);
+				}else{
+					break;
+				}		
+			}
+		}
+		commom::DEBUG_INFO("linenumber" + f.ConvertToStr(linenumber));
+		//uinsize = linenumber;
 		fclose(fi);
 		fclose(fo);
 		mySql.UpdataTask(taskid,string("3"));
+		/*
+		mySql.UpdataTask(taskid,string("5"));
+		string filepath = PATH + taskid + ".temp";
+		string fileout = PATH + taskid;
+		FILE* fi = fopen(filepath.c_str(), "r");
+		FILE*fo = fopen(fileout.c_str(),"ab+");
+		if ((fi == NULL)||(fo == NULL)) {
+			commom::LOG_INFO("open file error");
+			mySql.UpdataTask(taskid,string("2"));
+			return false;
+		}		
+		int linenumber = 0;
+		int uinnum = 0;
+		if(uinnumber != ""){
+			uinnum = atoi(uinnumber.c_str());
+		}		
+		std::string str = "";
+		char buffer[MAX_LENTH];	
+		if(uinnum == 0){
+			while ( f.ReadLine(buffer,MAX_LENTH,fi)!=NULL)	{
+				linenumber++ ;
+				str = f.GetLine(buffer) + "\n";
+				f.WiteLine(str.c_str(), fo);
+			}
+		}else{
+			while ( f.ReadLine(buffer,MAX_LENTH,fi)!=NULL)	{
+				str = f.GetLine(buffer) + "\n";
+				if(linenumber++ < uinnum){
+					f.WiteLine(str.c_str(), fo);
+				}else{
+					break;
+				}		
+			}
+		}
+		commom::DEBUG_INFO("linenumber" + f.ConvertToStr(linenumber));
+		//uinsize = linenumber;
+		fclose(fi);
+		fclose(fo);
+		mySql.UpdataTask(taskid,string("3"));
+		*/
 	}
 	bool Check::Send(string taskid){
 		mySql.UpdataTask(taskid,string("5"));
-		//string strscp = "rsync -av test_seanxywang qspace@10.234.151.147::mmocgameuin/from_data_apply";10.234.133.11
+		string strscp = "rsync -av ";
+		strscp += (PATH + taskid);
+		strscp += " qspace@10.234.151.147::mmocgameuin/from_data_apply";//10.234.133.11
 		//string strscp = "rsync -av test_seanxywang qspace@10.234.133.11::mmocgameuin/from_data_apply";
-		//system(strscp.c_str());
-		commom::LOG_INFO("send");
-		mySql.UpdataTask(taskid,string("4"));
+		commom::LOG_INFO("SYSTEM :" + f.ConvertToStr(system(strscp.c_str())));
+		path = "10.234.151.147::mmocgameuin//from_data_apply/";
+		path += taskid;
+
+		string fileout = PATH + taskid;
+		FILE* fi = fopen(fileout.c_str(), "r");
+		if (fi == NULL) {
+			commom::LOG_INFO("open file error");
+			mySql.UpdataTask(taskid,string("3"));
+			return false;
+		}		
+		int linenumber = 0;
+		char buffer[MAX_LENTH];	
+		while ( f.ReadLine(buffer,MAX_LENTH,fi)!=NULL)	{
+			linenumber++ ;
+		}
+		if(myLz.SendUinStaue(taskid,f.ConvertToStr(linenumber),path)){
+			commom::LOG_INFO("send");
+			mySql.UpdataTask(taskid,string("4"));
+		}else{
+			mySql.UpdataTask(taskid,string("3"));
+		}		
+		return false;		
 	}
 
 	bool Check::CheckTask(){

@@ -5,12 +5,19 @@
 #include "index.h"
 #include "model.h"
 #define PATH "./data/"
+typedef struct{
+	string tag;
+	string flag;
+	float score;
+}uininfo;
 namespace wordexpand{
 	class Check{
 	public:
 		Check();
 		~Check();
 	public:
+		//int uinsize;//实际量级
+		string path;
 		Sql mySql;
 		Lz myLz;
 		commom::Func f;

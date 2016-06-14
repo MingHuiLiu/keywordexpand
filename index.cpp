@@ -9,6 +9,7 @@ namespace wordexpand{
 
 	//初始化检索
 	bool Index::InitRetrieval(const char* dictpath){
+		commom::DEBUG_INFO("InitRetrieval");
 		mseg.InitDict(dictpath);
 		FILE*fi = fopen((string(dictpath) + "gamefilterdict").c_str(),"r");
 		if (fi == NULL) {
@@ -128,7 +129,7 @@ namespace wordexpand{
 		std::vector<std::string> v ;
 		//step1: query 检查,检查query结构， 参数是否完整		
 		//step2: query 解析
-		f.Split(",", query, v);
+		f.Split("_", query, v);
 		//step3: query 查询
 		//更新任务表
 		mySql.AddTask(taskinfo);
@@ -136,18 +137,15 @@ namespace wordexpand{
 		//UpdataKeywords(v,taskinfo);
 
 		//选择内容源
-		if(source == "0"){
+		if(source.at(0) == '1'){
 			if(BizRetrieval(v,bizresults) != true){
 				commom::LOG_INFO("BizRetrieval Error");
 			}
-		}else if(source == "1"){
-			if(ArticleRetrieval(v,articleresults) != true){
-				commom::LOG_INFO("ArticleRetrieval Error");
-			}
-		}else if(source == "2"){
-			if(BizRetrieval(v,bizresults) != true){
-				commom::LOG_INFO("BizRetrieval Error");
-			}
+		}
+		if(source.at(1) == '1'){
+			commom::LOG_INFO("friends");
+		}
+		if(source.at(2) == '1'){
 			if(ArticleRetrieval(v,articleresults) != true){
 				commom::LOG_INFO("ArticleRetrieval Error");
 			}
@@ -296,7 +294,7 @@ namespace wordexpand{
 		}
 		*/
 		
-		for(int i = 20160501; i<20160530; i++){
+		for(int i = 20160506; i<=20160510; i++){
 			string dbpath = "../../data/database/articleindex/" + f.ConvertToStr(i) + string("/");
 			commom::DEBUG_INFO(dbpath);
 			db.add_database(Xapian::Database(dbpath.c_str()));
