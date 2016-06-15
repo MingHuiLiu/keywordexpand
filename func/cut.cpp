@@ -124,7 +124,27 @@ void cut_file(const char* filein, const char* dbpath){
 	delete fo;
 }
 
+void readfile(const char* filein){
+	commom::Func f;
+	FILE*fi = fopen(filein,"r");
+	if (fi == NULL) {
+		commom::LOG_INFO("open file error" + string(filein));
+		return ;
+	}
+	char buffer[MAX_LENTH];		
+	std::string str = "";
+	std::vector<std::string> v ;
+	while ( f.ReadLine(buffer,MAX_LENTH,fi)!=NULL)	{
+		str = f.GetLine(buffer); 
+		f.Split("\t", str, v);
+		if(v.size() != 3)continue;
+		if(v.at(1) == "1"){
+			commom::DEBUG_INFO(str);
+		}
+	}
+	fclose(fi);
+}
 int main(int argc, char *argv[]) {
-	cut_file(argv[1], argv[2]);
+	readfile(argv[1]);
 	return 0;
 }

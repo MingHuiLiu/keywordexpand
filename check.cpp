@@ -37,22 +37,101 @@ namespace wordexpand{
 		string hadooppasswd = "-Dfs.default.name=hdfs://tl-if-nn-tdw.tencent-distribute.com:54310 -Dhadoop.job.ugi=tdw_seanxywang:tdw_seanxywang,g_cdg_weixin";
 		string strremotepath = "hdfs://tl-if-nn-tdw.tencent-distribute.com:54310/stage/outface/wxg/g_cdg_weixin/seanxy/tdw/out/" + taskid + "/attempt*";
 		string strremotepathcheck = "hdfs://tl-if-nn-tdw.tencent-distribute.com:54310/stage/outface/wxg/g_cdg_weixin/seanxy/tdw/out/" + taskid + "/" + taskid + ".check";
-		string strComGet = hadooppath + " fs " + hadooppasswd + " -get "  + " " + strremotepath + " " + PATH + taskid + ".temp";
+		//string strComGet = hadooppath + " fs " + hadooppasswd + " -get "  + " " + strremotepath + " " + PATH + taskid + ".temp";
+		string strComGet = hadooppath + " fs " + hadooppasswd + " -get "  + " " + strremotepath + " " + PATH;
 		//commom::DEBUG_INFO(strComGet);
 		commom::LOG_INFO("SYSTEM :" + f.ConvertToStr(system(strComGet.c_str())));
 
+		/*
+		string strComCat = string("cat ") + PATH + "attempt* ->" + PATH + taskid + ".temp";
+		commom::DEBUG_INFO(strComCat);
+		commom::LOG_INFO("SYSTEM :" + f.ConvertToStr(system(strComCat.c_str())));
+		string strRm = "rm -rf ./data/attempt*";
+		commom::LOG_INFO("SYSTEM :" + f.ConvertToStr(system(strRm.c_str())));
+		*/
 		strComGet = hadooppath + " fs " + hadooppasswd + " -get "  + " " + strremotepathcheck + " " + PATH;
 		//commom::DEBUG_INFO(strComGet);
 		commom::LOG_INFO("SYSTEM :" + f.ConvertToStr(system(strComGet.c_str())));
 		mySql.UpdataTask(taskid,string("2"));
 		return true;
 	}
+
+	//uin \t tag \t flag
+	bool Check::AddRandom(const char* path, int num){
+		commom::LOG_INFO("add random");
+		srand( (unsigned)time( NULL ) );
+		FILE* fi = fopen(RANDOMPATH, "r");
+		FILE*fo = fopen(path,"ab+");
+		if ((fi == NULL)||(fo == NULL)) {
+			commom::LOG_INFO("open file error");
+			return false;
+		}		
+		std::string str = "";
+		std::vector<string>v;
+		char buffer[MAX_LENTH];	
+		while ( f.ReadLine(buffer,MAX_LENTH,fi)!=NULL)	{
+			str = f.GetLine(buffer);
+			f.Split("\t",str,v);
+			if(v.size() != 2) continue;
+			str = v.at(0);
+			if(rand()%UINTOTAL < num){
+				str += "\t9\t0\n";
+				f.WiteLine(str.c_str(), fo);
+			}
+		}
+		return true;
+	}
+
+	bool comp(const std::pair<string, uininfo> & x, const std::pair<string, uininfo> & y){
+		return x.second.score > y.second.score;
+	}
+
+	//tag 0:biz 1:article 9:random
 	bool Check::Process(string taskid,string uinnumber){
 		mySql.UpdataTask(taskid,string("5"));
+		//读取check,读出文件名
+		string checkfile = PATH +taskid + ".check";
+		FILE* fi = fopen(checkfile.c_str(), "r");
 		string filepath = PATH + taskid + ".temp";
+		FILE*fo = fopen(filepath.c_str(),"ab+");
+		if ((fi == NULL)||(fo == NULL)) {
+			commom::LOG_INFO("open file error");
+			mySql.UpdataTask(taskid,string("2"));
+			return false;
+		}	
+		std::string str = "";
+		std::vector<string> v;
+		char buffer[MAX_LENTH];	
+		while ( f.ReadLine(buffer,MAX_LENTH,fi)!=NULL)	{			
+			str = f.GetLine(buffer);
+			if(str.size() > 10){
+				v.push_back(str);
+			}
+		}
+		fclose(fi);
+		//将所有文件写入
+		commom::LOG_INFO(f.ConvertToStr(v.size()));
+		commom::DEBUG_INFO("read ok");
+		for(int j =0; j< v.size(); j++){
+			commom::LOG_INFO(v.at(j));
+			fi = fopen((PATH +v.at(j)).c_str(), "r");
+			if (fi == NULL) {
+				commom::LOG_INFO("open attemp file  error");
+				mySql.UpdataTask(taskid,string("2"));
+				return false;
+			}	
+			while ( f.ReadLine(buffer,MAX_LENTH,fi)!=NULL)	{
+				str = f.GetLine(buffer);
+				str += "\n";
+				f.WiteLine(str.c_str(), fo);
+			}
+			fclose(fi);
+		}
+		fclose(fo);		
+		
 		string fileout = PATH + taskid;
-		FILE* fi = fopen(filepath.c_str(), "r");
-		FILE*fo = fopen(fileout.c_str(),"ab+");
+		fi = fopen(filepath.c_str(), "r");
+		fo = fopen(fileout.c_str(),"ab+");
 		if ((fi == NULL)||(fo == NULL)) {
 			commom::LOG_INFO("open file error");
 			mySql.UpdataTask(taskid,string("2"));
@@ -60,9 +139,7 @@ namespace wordexpand{
 		}		
 		uininfo tmp;
 		std::map<string,uininfo>dict;
-		std::string str = "";
-		std::vector<string>v;
-		char buffer[MAX_LENTH];	
+
 		while ( f.ReadLine(buffer,MAX_LENTH,fi)!=NULL)	{
 			str = f.GetLine(buffer);
 			f.Split("\t",str,v);
@@ -78,75 +155,37 @@ namespace wordexpand{
 			}
 		}
 		commom::LOG_INFO(f.ConvertToStr(dict.size()));
-
-
-		int linenumber = 0;
-		int uinnum = 0;
-		if(uinnumber != ""){
-			uinnum = atoi(uinnumber.c_str());
-		}		
-
-		if(uinnum == 0){
-			while ( f.ReadLine(buffer,MAX_LENTH,fi)!=NULL)	{
-				linenumber++ ;
-				str = f.GetLine(buffer) + "\n";
-				f.WiteLine(str.c_str(), fo);
+		//return false;
+		//取所有
+		if(uinnumber == ""){
+			for(std::map<string,uininfo>::iterator it = dict.begin(); it != dict.end(); it++){
+				f.WiteLine((it->first + "\t" + it->second.tag + "\t" + it->second.flag + "\n").c_str(), fo);
 			}
+			fclose(fo);
+			AddRandom(fileout.c_str(), dict.size()/10);			
 		}else{
-			while ( f.ReadLine(buffer,MAX_LENTH,fi)!=NULL)	{
-				str = f.GetLine(buffer) + "\n";
-				if(linenumber++ < uinnum){
-					f.WiteLine(str.c_str(), fo);
-				}else{
-					break;
-				}		
+			int number = atoi(uinnumber.c_str());
+			if(number >= dict.size()){
+				for(std::map<string,uininfo>::iterator it = dict.begin(); it != dict.end(); it++){
+					f.WiteLine((it->first + "\t" + it->second.tag + "\t" + it->second.flag + "\n").c_str(), fo);
+				}
+				fclose(fo);
+				AddRandom(fileout.c_str(), dict.size()/10);		
+			}else{
+				//排序
+				std::vector<std::pair<string, uininfo> >tmpvec;
+				for(std::map<string,uininfo>::iterator it = dict.begin(); it != dict.end(); it++){
+					tmpvec.push_back(*it);
+				}
+				sort(tmpvec.begin(), tmpvec.end(),comp);
+				for(int j =0; j< number; j++){
+					f.WiteLine((tmpvec.at(j).first + "\t" + tmpvec.at(j).second.tag + "\t" + tmpvec.at(j).second.flag + "\n").c_str(), fo);
+				}
+				fclose(fo);
+				AddRandom(fileout.c_str(), number/10);		
 			}
-		}
-		commom::DEBUG_INFO("linenumber" + f.ConvertToStr(linenumber));
-		//uinsize = linenumber;
-		fclose(fi);
-		fclose(fo);
+		}	
 		mySql.UpdataTask(taskid,string("3"));
-		/*
-		mySql.UpdataTask(taskid,string("5"));
-		string filepath = PATH + taskid + ".temp";
-		string fileout = PATH + taskid;
-		FILE* fi = fopen(filepath.c_str(), "r");
-		FILE*fo = fopen(fileout.c_str(),"ab+");
-		if ((fi == NULL)||(fo == NULL)) {
-			commom::LOG_INFO("open file error");
-			mySql.UpdataTask(taskid,string("2"));
-			return false;
-		}		
-		int linenumber = 0;
-		int uinnum = 0;
-		if(uinnumber != ""){
-			uinnum = atoi(uinnumber.c_str());
-		}		
-		std::string str = "";
-		char buffer[MAX_LENTH];	
-		if(uinnum == 0){
-			while ( f.ReadLine(buffer,MAX_LENTH,fi)!=NULL)	{
-				linenumber++ ;
-				str = f.GetLine(buffer) + "\n";
-				f.WiteLine(str.c_str(), fo);
-			}
-		}else{
-			while ( f.ReadLine(buffer,MAX_LENTH,fi)!=NULL)	{
-				str = f.GetLine(buffer) + "\n";
-				if(linenumber++ < uinnum){
-					f.WiteLine(str.c_str(), fo);
-				}else{
-					break;
-				}		
-			}
-		}
-		commom::DEBUG_INFO("linenumber" + f.ConvertToStr(linenumber));
-		//uinsize = linenumber;
-		fclose(fi);
-		fclose(fo);
-		mySql.UpdataTask(taskid,string("3"));
-		*/
 	}
 	bool Check::Send(string taskid){
 		mySql.UpdataTask(taskid,string("5"));

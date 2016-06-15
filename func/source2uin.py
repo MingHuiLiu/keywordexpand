@@ -21,28 +21,35 @@ def get_article_click_uin(tdw):
     res = tdw.execute(sql)
     sql="""alter table wxy_daily_game_uinlist add partition p_%s values in (%s)""" %(taskid_, taskid_)
     res = tdw.execute(sql)
+
+    sql="""alter table  wxy_daily_game_uinres drop partition (p_%s)"""%(taskid_)
+    res = tdw.execute(sql)
+    sql="""alter table wxy_daily_game_uinres add partition p_%s values in (%s)""" %(taskid_, taskid_)
+    res = tdw.execute(sql)
     WriteLog("running=",sql)
     sql="use wxg_data_valueless"
     res = tdw.execute(sql)
 
    #article
+
     sql = '''INSERT table wxy_daily_game_uinlist
               SELECT
  	            a.taskid as taskid,
- 	            b.bizuin_ as uin,
+ 	            b.uin as uin,
  	           '1' as tag,
            	   '1' as flag,
  	            1 as score
              FROM
                (SELECT * FROM wxy_sourceid_partition where taskid = '%s' and tag = '1') a
              JOIN
-                wxg_data_valueless::wxy_article_read b
+                wxg_data_valueless::wxy_gamearticle_read b
              ON
                 a.id = concat(ltrim(b.bizuin_),'_',ltrim(b.appmsgid_),'_',ltrim(b.itemidx_))
              where b.ds = "20160511"
           '''%taskid_
     WriteLog("running=",sql)
     res = tdw.execute(sql)
+
     #biz
     sql = '''INSERT table wxy_daily_game_uinlist
               SELECT
@@ -61,9 +68,6 @@ def get_article_click_uin(tdw):
           '''%taskid_
     WriteLog("running=",sql)
     res = tdw.execute(sql)
-
-
-
     """
     sql = " SELECT * FROM wxy_sourceid_partition where taskid = '%s' and tag = 1"%taskid_
     res = tdw.execute(sql)
@@ -99,6 +103,19 @@ def get_article_click_uin(tdw):
         WriteLog("running=",sql)
         res = tdw.execute(sql)
     """
+    #restable wxy_daily_game_uinres
+    sql = '''INSERT OVERWRITE TABLE wxy_daily_game_uinres
+              SELECT
+ 	            uin as uin,
+ 	            tag as tag,
+ 	            flag as flag,
+ 	            count(1) as score
+             FROM
+                wxy_daily_game_uinlist
+             where taskid ='%s' group by uin,tag
+          '''%taskid_
+    WriteLog("running=",sql)
+    res = tdw.execute(sql)
 
 def TDW_PL(tdw, argv=[]):
     config(argv)

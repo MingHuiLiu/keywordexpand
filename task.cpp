@@ -52,7 +52,7 @@ namespace wordexpand{
 		}
 		string keywd = dict["keywd"];
 		//
-		keywd = "英雄联盟";
+		keywd = "保卫萝卜_植物大战僵尸_塔防";
 		if(keywd == ""){
 			desc = "keywd error!";
 			//mylog.LOG(taskid,("ERROR :" + desc + "\n").c_str());

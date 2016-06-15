@@ -268,7 +268,7 @@ namespace wordexpand{
 		dcitExtParam["destCheckFilePath"] = destFilePathName;			
 		dcitExtParam["destFileDelimiter"] = "9";				
 		dcitExtParam["destFilePath"] = destFilePathName;	
-		string strsql = "select uin,tag,count(1) FROM wxy_daily_game_uinlist where taskid =" + taskid + " group by uin,tag";
+		string strsql = "select uin,tag,score FROM wxy_daily_game_uinres where taskid =" + taskid + "order by score";
 		dcitExtParam["filterSQL"] = strsql;		
 		taskParams["targetServer"]="hdfs_tl-if-nn-tdw.tencent-distribute.com";
 		taskParams["sourceServer"]="tdw_tl";
