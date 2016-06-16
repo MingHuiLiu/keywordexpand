@@ -52,7 +52,7 @@ namespace wordexpand{
 		}
 		string keywd = dict["keywd"];
 		//
-		keywd = "保卫萝卜_植物大战僵尸_塔防";
+		//keywd = "保卫萝卜_植物大战僵尸_帝国塔防3_塔防_帝国塔防_开心消消乐_糖果消消乐_极地冒险_炮塔_天天消消乐_魔法_植物大战僵尸";
 		if(keywd == ""){
 			desc = "keywd error!";
 			//mylog.LOG(taskid,("ERROR :" + desc + "\n").c_str());
@@ -64,10 +64,54 @@ namespace wordexpand{
 			//mylog.LOG(taskid,("ERROR :" + desc + "\n").c_str());
 			return false;
 		}
-		if((dict["source"].size() <0)||(dict["source"].size() >3)){
+
+		if(dict["source"].size() != 1){
 			desc = "source error!";
 			//mylog.LOG(taskid,("ERROR :" + desc + "\n").c_str());
 			return false;
+		}
+		int sourceint = atoi(dict["source"].c_str());
+		commom::DEBUG_INFO(f.ConvertToStr(sourceint));
+		if(sourceint == 0){
+			return false;
+		}else if(sourceint == 1){
+			inputconf.source = "001";
+		}else if(sourceint == 2){
+			inputconf.source = "010";
+		}else if(sourceint == 3){
+			inputconf.source = "011";
+		}else if(sourceint == 4){
+			inputconf.source = "100";
+		}else if(sourceint == 5){
+			inputconf.source = "101";
+		}else if(sourceint == 6){
+			inputconf.source = "110";
+		}else if(sourceint == 7){
+			inputconf.source = "111";
+		}else{
+			return false;
+		}
+		/*
+		if(dict["source"].find("1") != string::npos){
+			inputconf.source += "1";
+		}else{
+			inputconf.source += "0";
+		}
+		if(dict["source"].find("2") != string::npos){
+			inputconf.source += "1";
+		}else{
+			inputconf.source += "0";
+		}
+		if(dict["source"].find("4") != string::npos){
+			inputconf.source += "1";
+		}else{
+			inputconf.source += "0";
+		}
+		/*
+		if((dict["source"].size() <0)||(dict["source"].size() >3)){
+		desc = "source error!";
+		//mylog.LOG(taskid,("ERROR :" + desc + "\n").c_str());
+		return false;
 		}
 		if(dict["source"].find("1") != string::npos){
 			inputconf.source += "1";
@@ -84,6 +128,9 @@ namespace wordexpand{
 		}else{
 			inputconf.source += "0";
 		}
+		*/
+
+
 		if(inputconf.source.size() != 3){
 			desc = "source error!";
 			//mylog.LOG(taskid,("ERROR :" + desc + "\n").c_str());
@@ -175,11 +222,19 @@ namespace wordexpand{
 			commom::LOG_INFO("open file error" + string(localfiledir + taskid));
 			return false;
 		}
+		int i = 0;
 		for(std::vector<bizinfo>::iterator it =  bizresults.begin(); it != bizresults.end(); it++){
+			if(i++ > 200){
+				break;
+			}
 			str = taskid + string("\t") + (*it).uin + string("\t0\t1\t") +f.ConvertToStr((*it).score) + "\n";
 			f.WiteLine(str.c_str(),fo);
 		}	
+		i = 0;
 		for(std::vector<articleinfo>::iterator it = articleresults.begin(); it != articleresults.end(); it++){
+			if(i++ > 1000){
+				break;
+			}
 			str = taskid + string("\t") + (*it).articleuin + string("\t1\t1\t") +f.ConvertToStr((*it).score) + "\n";
 			f.WiteLine(str.c_str(),fo);
 		}	
@@ -222,6 +277,7 @@ namespace wordexpand{
 			//mylog.LOG(taskid,"DEBUG_INFO : UinToFile error");
 			return false;
 		}
+		//return false;
 		//mylog.LOG(taskid,"DEBUG_INFO : UinToFile OK");
 		return CallLz();
 	}

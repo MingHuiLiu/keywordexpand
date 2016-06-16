@@ -10,6 +10,9 @@ namespace wordexpand{
 	public:
 		BitMap(){
 			data = new int[1 + N/BITSPERWORD];
+			for(int i =0; i<1 + N/BITSPERWORD; i++ ){
+				data[i] = 0;
+			}
 		}
 		~BitMap(){
 			delete data;

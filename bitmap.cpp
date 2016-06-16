@@ -18,6 +18,7 @@ namespace wordexpand{
 		std::string str = "";
 		std::vector<string>v;
 		char buffer[MAX_LENTH];	
+		int i = 0;
 		while ( f.ReadLine(buffer,MAX_LENTH,fi)!=NULL)	{
 			str = f.GetLine(buffer);
 			f.Split("\t",str,v);
@@ -27,7 +28,6 @@ namespace wordexpand{
 					set(x);
 				}
 			}
-
 	    }
 		return true;
 	}

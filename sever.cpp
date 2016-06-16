@@ -83,7 +83,7 @@ namespace wordexpand{
 	bool Sever::StartSever(){
 		commom::DEBUG_INFO("begin");
 		char *host_ip = "10.223.48.117";
-		int host_port = 9091;
+		int host_port = 9093;
 		int timeout = 500;
 		struct evhttp *httpd;  
 		event_init();  

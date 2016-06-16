@@ -61,54 +61,20 @@ def get_article_click_uin(tdw):
              FROM
                (SELECT * FROM wxy_sourceid_partition where taskid = '%s' and tag = '0') a
              JOIN
-                cdg_weixin_secret::daily_raw_weixin_biz_user_relations b
+                wxg_data_valueless::wxy_daily_raw_weixin_biz_user_relations b
              ON
                  a.id = b.fbiz_uin
-             where b.fdate_cd = "20160529"
+             where b.fdate_cd = "20160601"
           '''%taskid_
     WriteLog("running=",sql)
     res = tdw.execute(sql)
-    """
-    sql = " SELECT * FROM wxy_sourceid_partition where taskid = '%s' and tag = 1"%taskid_
-    res = tdw.execute(sql)
-    WriteLog("running=",sql)
-    if len(res) > 1:
-        idx =0
-        sql = '''insert table wxy_daily_game_uinlist
-               SELECT
-                    '%s' as taskid,
-                    uin as uin ,
-                    '1' as tag ,
-                    '1' as flag,
-                    1 as score
-                FROM wxg_data_valueless::wxy_article_read
-                WHERE'''%(taskid_)
-        sql += "("
-        for index in range(len(res) - 1):
-            subList = res[index].split("\t")
-            print subList
-            articleis = subList[1].split("_")
-            if len(articleis) < 3:
-                print "<3"
-                continue
-            bizuin_ = articleis[0]
-            appmsgid_ = articleis[1]
-            itemidx_ = articleis[2]
-            if idx != 0:
-                sql += " or "
-            else:
-                idx = idx + 1
-            sql += "(bizuin_=%s and appmsgid_=%s and itemidx_=%s)"%(bizuin_,appmsgid_,itemidx_)
-        sql += ") and ds = '20160511'"
-        WriteLog("running=",sql)
-        res = tdw.execute(sql)
-    """
+
     #restable wxy_daily_game_uinres
     sql = '''INSERT OVERWRITE TABLE wxy_daily_game_uinres
               SELECT
+               '%s' as taskid,
  	            uin as uin,
  	            tag as tag,
- 	            flag as flag,
  	            count(1) as score
              FROM
                 wxy_daily_game_uinlist

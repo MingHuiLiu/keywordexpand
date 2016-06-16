@@ -159,7 +159,7 @@ namespace wordexpand{
 	bool Index::BizRetrieval(std::vector<string>& querylist,std::vector<bizinfo>& results){
 		
 		Xapian::Database db;
-		db.add_database(Xapian::Database("../../data/database/bizindex/index/"));
+		db.add_database(Xapian::Database("../../data/database/bizindex/indexnew/"));
 		commom::DEBUG_INFO("OPEN BIZINDEX OK");
 		Xapian::Enquire enquire(db);
 		return BizRetrieval(enquire, querylist,results,"OR");
@@ -226,10 +226,13 @@ namespace wordexpand{
 		string query = "";
 		//seg
 		std::vector<string> v;
-		for(int i = 0; i < querylist.size(); i++){
+		for(int i = 0; i < querylist.size(); i++){		
+
+			/*
 			query += "(";
-			/*词内部之间关系，针对包含字母的*/
+			//词内部之间关系，针对包含字母的
 			f.Split(" ", mseg.QuickSegement(querylist.at(i).c_str()), v);
+			
 			if(v.size() == 1){
 				query += ("(title:" + querylist.at(i) + ")");
 			}else{
@@ -241,7 +244,7 @@ namespace wordexpand{
 				query += ("(title:" + v.at(v.size() -1));
 				query += "))";
 			}
-			/*词组之间关系*/
+			//词组之间关系
 			query += (" " + str + " ");
 			//f.Split(" ", querylist.at(i), v);
 			if(v.size() == 1){
@@ -256,6 +259,13 @@ namespace wordexpand{
 				query += ")";
 			}
 			//query += ("content:" + querylist.at(i));	
+			query += ")";
+
+			*/
+			query += "(";
+			query += ("(title:" + querylist.at(i) + ")");
+			query += (" " + str + " ");
+			query += ("content:" + querylist.at(i));	
 			query += ")";
 			if(i+1 <querylist.size()){
 				query += " OR ";
