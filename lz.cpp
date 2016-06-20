@@ -246,7 +246,8 @@ namespace wordexpand{
 		std::map<string,string> taskParams;
 		Init(taskParams);
 		std::map<string,string> dcitExtParam;
-		dcitExtParam["file_name"] = "source2uin.py";
+		//dcitExtParam["file_name"] = "source2uin.py";
+		dcitExtParam["file_name"] = "source2uintest.py";
 		dcitExtParam["params"] = string(taskid);	
 		taskParams["parentTaskId"] ="{"+parentid+":1}";
 		taskParams["taskType"] = "121";
@@ -268,7 +269,8 @@ namespace wordexpand{
 		dcitExtParam["destCheckFilePath"] = destFilePathName;			
 		dcitExtParam["destFileDelimiter"] = "9";				
 		dcitExtParam["destFilePath"] = destFilePathName;	
-		string strsql = "select uin,tag,score FROM wxy_daily_game_uinres where taskid =" + taskid + "order by score";
+		//string strsql = "select uin,tag,score FROM wxy_daily_game_uinres where taskid =" + taskid + " order by score";
+		string strsql = "select uin,tag,score FROM wxy_daily_game_active_uin where taskid =" + taskid + " order by score";		
 		dcitExtParam["filterSQL"] = strsql;		
 		taskParams["targetServer"]="hdfs_tl-if-nn-tdw.tencent-distribute.com";
 		taskParams["sourceServer"]="tdw_tl";

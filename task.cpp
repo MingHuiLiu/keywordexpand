@@ -91,45 +91,6 @@ namespace wordexpand{
 		}else{
 			return false;
 		}
-		/*
-		if(dict["source"].find("1") != string::npos){
-			inputconf.source += "1";
-		}else{
-			inputconf.source += "0";
-		}
-		if(dict["source"].find("2") != string::npos){
-			inputconf.source += "1";
-		}else{
-			inputconf.source += "0";
-		}
-		if(dict["source"].find("4") != string::npos){
-			inputconf.source += "1";
-		}else{
-			inputconf.source += "0";
-		}
-		/*
-		if((dict["source"].size() <0)||(dict["source"].size() >3)){
-		desc = "source error!";
-		//mylog.LOG(taskid,("ERROR :" + desc + "\n").c_str());
-		return false;
-		}
-		if(dict["source"].find("1") != string::npos){
-			inputconf.source += "1";
-		}else{
-			inputconf.source += "0";
-		}
-		if(dict["source"].find("2") != string::npos){
-			inputconf.source += "1";
-		}else{
-			inputconf.source += "0";
-		}
-		if(dict["source"].find("4") != string::npos){
-			inputconf.source += "1";
-		}else{
-			inputconf.source += "0";
-		}
-		*/
-
 
 		if(inputconf.source.size() != 3){
 			desc = "source error!";
@@ -271,6 +232,7 @@ namespace wordexpand{
 			//mylog.LOG(taskid,"DEBUG_INFO : Retrieval error");
 			return false;
 		}
+		//return false;
 		//mylog.LOG(taskid,"DEBUG_INFO : Retrieval OK");
 		if(!UinToFile()){
 			commom::LOG_INFO("UinToFile error");

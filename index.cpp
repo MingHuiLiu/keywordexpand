@@ -227,41 +227,6 @@ namespace wordexpand{
 		//seg
 		std::vector<string> v;
 		for(int i = 0; i < querylist.size(); i++){		
-
-			/*
-			query += "(";
-			//词内部之间关系，针对包含字母的
-			f.Split(" ", mseg.QuickSegement(querylist.at(i).c_str()), v);
-			
-			if(v.size() == 1){
-				query += ("(title:" + querylist.at(i) + ")");
-			}else{
-				//联合查询
-				query += "(";
-				for(int j = 0; j< v.size()-1; j++){
-					query += ("(title:" + v.at(j) + ") OR ") ;
-				}	
-				query += ("(title:" + v.at(v.size() -1));
-				query += "))";
-			}
-			//词组之间关系
-			query += (" " + str + " ");
-			//f.Split(" ", querylist.at(i), v);
-			if(v.size() == 1){
-				query += ("(content:" + querylist.at(i) + ")");
-			}else{
-				//联合查询
-				query += "(";
-				for(int j = 0; j< v.size()-1; j++){
-					query += ("content:" + v.at(j) + " OR ") ;
-				}	
-				query += ("content:" + v.at(v.size() -1));
-				query += ")";
-			}
-			//query += ("content:" + querylist.at(i));	
-			query += ")";
-
-			*/
 			query += "(";
 			query += ("(title:" + querylist.at(i) + ")");
 			query += (" " + str + " ");
@@ -296,19 +261,23 @@ namespace wordexpand{
 
 	bool Index::ArticleRetrieval(std::vector<string>& querylist,std::vector<articleinfo>& results){
 		Xapian::Database db;
-		//std::map<string,int> dblist;
-		//f.GetDirfile(dblist,"../../data/database/articleindex/");
-		/*
+		std::map<string,int> dblist;
+		f.GetDirfile(dblist,"../../data/database/gamearticleindex/");
 		for(std::map<string,int>::iterator it = dblist.begin(); it != dblist.end(); it++){
-			db.add_database()
-		}
-		*/
-		
-		for(int i = 20160506; i<=20160510; i++){
-			string dbpath = "../../data/database/articleindex/" + f.ConvertToStr(i) + string("/");
+			if((it->first.size() != 8)||(it->first > "20160610")||(it->first < "20160500")){
+				continue;
+			}
+			string dbpath = "../../data/database/gamearticleindex/" + it->first + string("/");
 			commom::DEBUG_INFO(dbpath);
 			db.add_database(Xapian::Database(dbpath.c_str()));
 		}
+		/*
+		for(int i = 20160506; i<=20160610; i++){
+			string dbpath = "../../data/database/gamedailyarticle/" + f.ConvertToStr(i) + string("/");
+			commom::DEBUG_INFO(dbpath);
+			db.add_database(Xapian::Database(dbpath.c_str()));
+		}
+		*/
 		commom::DEBUG_INFO("OPEN ARTICLEINDEX OK");
 		Xapian::Enquire enquire(db);
 		commom::DEBUG_INFO("BEGIN RETRIEAL");

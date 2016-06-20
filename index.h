@@ -28,6 +28,7 @@ namespace wordexpand{
 		bool BizRetrieval(Xapian::Enquire& enquire, std::vector<string>& querylist,
 						 std::vector<bizinfo>& results,const char* relationship);
 		string JionQuery(std::vector<string>& querylist, string str);
+		string ArticleJionQuery(std::vector<string>& querylist, string str);
 		bool Rank(Xapian::MSet& matches,std::vector<bizinfo>& results);
 		bool ArticleRank(Xapian::MSet& matches,std::vector<articleinfo>& results);
 		bool FilerGame(string str);
