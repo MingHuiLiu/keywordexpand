@@ -11,8 +11,6 @@ namespace wordexpand{
 			return;  
 		}  	
 		char *decode_uri = strdup((char*) evhttp_request_uri(req));
-		//std::cout<<decode_uri<<std::endl;
-		//Sever::test();
 		Task mTask;
 		string re = "";
 		if(mTask.TaskApi(decode_uri)){
@@ -27,22 +25,8 @@ namespace wordexpand{
 		evhttp_clear_headers(&http_query);
 		evbuffer_free(buf);
 	}
-	void onTime(int sock, short event, void *arg) { 
-		commom::DEBUG_INFO("HELLO");
-
-		struct timeval tv; 
-		tv.tv_sec = 1; 
-		tv.tv_usec = 0; 
-		for(int j =0; j<100000; j++){
-			for(int i =0; i<100000; i++){
-
-			}
-		}
-		commom::DEBUG_INFO("WORLD");
-		event_add((struct event*)arg, &tv); 
-	} 
-
 	void CallBack(struct evhttp_request *req, void *arg){
+		commom::Func f;
 		commom::DEBUG_INFO("lisenling");
 		struct evkeyvalq http_query_post;
 		int buffer_data_len = EVBUFFER_LENGTH(req->input_buffer);
@@ -66,9 +50,9 @@ namespace wordexpand{
 		restr += "\"taskid\":";
 		restr += "\"" + mTask.taskid +"\"";
 		restr += "}";
-		commom::LOG_INFO(restr);
+		
+		commom::LOG_INFO(f.GetTime() + "\t:" + restr);
 		free(post_data);
-		//mTask.~Task();
 		struct evbuffer *buf = evbuffer_new();
 		if(!buf){  
 			puts("failed to create response buffer");  
@@ -83,20 +67,10 @@ namespace wordexpand{
 	bool Sever::StartSever(){
 		commom::DEBUG_INFO("begin");
 		char *host_ip = "10.223.48.117";
-		int host_port = 9093;
+		int host_port = 9091;
 		int timeout = 500;
 		struct evhttp *httpd;  
 		event_init();  
-
-		/*
-		struct event evTime; 
-		evtimer_set(&evTime, onTime, &evTime); 
-		struct timeval tv; 
-		tv.tv_sec = 1; 
-		tv.tv_usec = 0; 
-		// 添加定时事件 
-		evtimer_add(&evTime, &tv); 
-		*/
 		httpd = evhttp_start(host_ip, host_port);
 		if(!httpd){  
 			return 1;  

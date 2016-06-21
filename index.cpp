@@ -134,23 +134,23 @@ namespace wordexpand{
 		//更新任务表
 		mySql.AddTask(taskinfo);
 		//更新关键词表
-		//UpdataKeywords(v,taskinfo);
+		mySql.UpdataKeywords(v,taskinfo);
 
 		//选择内容源
 		if(source.at(0) == '1'){
-			if(BizRetrieval(v,bizresults) != true){
-				commom::LOG_INFO("BizRetrieval Error");
+			if(ArticleRetrieval(v,articleresults) != true){
+				commom::LOG_INFO("ArticleRetrieval Error");
 			}
+			
 		}
 		if(source.at(1) == '1'){
 			commom::LOG_INFO("friends");
 		}
 		if(source.at(2) == '1'){
-			if(ArticleRetrieval(v,articleresults) != true){
-				commom::LOG_INFO("ArticleRetrieval Error");
+			if(BizRetrieval(v,bizresults) != true){
+				commom::LOG_INFO("BizRetrieval Error");
 			}
 		}
-		
 		//UpdataBiz(bizresults, taskinfo);		
 		//step4: query 组合排序、输出
 		return true;
@@ -189,7 +189,7 @@ namespace wordexpand{
 		sort(results.begin(), results.end(),Bizrank);
 		int x =  results.size() < 100 ? results.size() : 100 ;
 		for(int i =0; i< x; i++){
-			commom::DEBUG_INFO(results.at(i).bizname + "\t" + f.ConvertToStr(results.at(i).score));
+			commom::DEBUG_INFO(results.at(i).bizname + "\t" + results.at(i).bizdesc + "\t" + f.ConvertToStr(results.at(i).score));
 		}
 		return true;
 	}
@@ -226,18 +226,95 @@ namespace wordexpand{
 		string query = "";
 		//seg
 		std::vector<string> v;
-		for(int i = 0; i < querylist.size(); i++){		
-			query += "(";
-			query += ("(title:" + querylist.at(i) + ")");
-			query += (" " + str + " ");
-			query += ("content:" + querylist.at(i));	
-			query += ")";
+		for(int i = 0; i < querylist.size(); i++){	
+			/*
+			f.Split(" ",mseg.Segement(querylist.at(i).c_str()), v);
+			if(v.size() == 0) return "";
+			if(v.size() == 1){
+				//query += "(";
+				query += ("(title:" + querylist.at(i) + ")");
+				query += (" " + str + " ");
+				query += ("content:" + querylist.at(i));	
+				query += ")";
+			}else{
+				query += "((";
+				for(int j =0; j< v.size() -1; j++){
+					query += ("title:" + v.at(j) + " AND ");
+				}
+				query += ("title:" +v.at(v.size() -1));
+				query += "))";
+				query += (" " + str + " ");
+				query += "((";
+				for(int j =0; j< v.size() -1; j++){
+					query += ("content:" + v.at(j) + " AND ");
+				}
+				query += ("content:" +v.at(v.size() -1));
+				query += ")";
+			}	
+
+			if(i+1 <querylist.size()){
+				query += " OR ";
+			}
+			*/
+			
+			f.Split(" ",mseg.Segement(querylist.at(i).c_str()), v);
+			if(v.size() == 0) return "";
+			if(v.size() == 1){
+				query += "(";
+				query += ("(title:" + querylist.at(i) + ")");
+				query += (" " + str + " ");
+				query += ("content:" + querylist.at(i));	
+				query += ")";
+			}else{
+				query += "(";
+				for(int j =0; j< v.size() -1; j++){
+					query += ("(title:" + v.at(j) + ") AND ");
+				}
+				query += ("(title:" + v.at(v.size() -1) + ")");
+				query += ")";
+
+				query += (" " + str + " ");
+				query += "(";
+				for(int j =0; j< v.size() -1; j++){
+					query += ("(content:" + v.at(j) + ") AND ");
+				}
+				query += ("(content:" + v.at(v.size() -1) + ")");
+				query += ")";
+				
+			}	
+
 			if(i+1 <querylist.size()){
 				query += " OR ";
 			}
 		}
 		return query;
 	}
+
+	string Index::ArticleJionQuery(std::vector<string>& querylist){
+		string query = "";
+		//seg
+		std::vector<string> v;
+		for(int i = 0; i < querylist.size(); i++){	
+			f.Split(" ",mseg.Segement(querylist.at(i).c_str()), v);
+			if(v.size() == 0) return "";
+			if(v.size() == 1){
+				query += querylist.at(i);
+			}else{
+				query += "(";
+				for(int j =0; j< v.size() -1; j++){
+					query += (v.at(j) + " AND ");
+				}
+				query += (v.at(v.size() -1));
+				query += ")";
+			}	
+			if(i+1 <querylist.size()){
+				query += " OR ";
+			}
+		}
+		return query;
+
+	}
+
 
 	bool Index::BizRetrieval(Xapian::Enquire& enquire, std::vector<string>& querylist,
 							std::vector<bizinfo>& results, const char* relationship){
@@ -271,13 +348,6 @@ namespace wordexpand{
 			commom::DEBUG_INFO(dbpath);
 			db.add_database(Xapian::Database(dbpath.c_str()));
 		}
-		/*
-		for(int i = 20160506; i<=20160610; i++){
-			string dbpath = "../../data/database/gamedailyarticle/" + f.ConvertToStr(i) + string("/");
-			commom::DEBUG_INFO(dbpath);
-			db.add_database(Xapian::Database(dbpath.c_str()));
-		}
-		*/
 		commom::DEBUG_INFO("OPEN ARTICLEINDEX OK");
 		Xapian::Enquire enquire(db);
 		commom::DEBUG_INFO("BEGIN RETRIEAL");
@@ -287,13 +357,7 @@ namespace wordexpand{
 	bool Index::ArticleRetrieval(Xapian::Enquire& enquire, std::vector<string>& querylist,
 		std::vector<articleinfo>& results, const char* relationship){
 			Xapian::QueryParser qp;
-			string query_string = "";
-			for(int i = 0; i < querylist.size(); i++){
-				query_string += querylist.at(i);
-				if(i+1 <querylist.size()){
-					query_string += " OR ";
-				}
-			}
+			string query_string = ArticleJionQuery(querylist);
 			commom::DEBUG_INFO(query_string);
 			Xapian::Query query = qp.parse_query(query_string);
 			enquire.set_query(query);

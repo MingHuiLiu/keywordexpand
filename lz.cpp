@@ -80,11 +80,9 @@ namespace wordexpand{
 		params += real_magnitude;
 		params +="&package_path=";
 		params += package_path;
-		commom::DEBUG_INFO(params);
+		//commom::DEBUG_INFO(params);
 		curl = curl_easy_init();    // 初始化
-		//string url = "10.123.98.16:14748/packagenotify?sign=wx312121&applyer=jimxfzhu";
-		//string url = "10.123.98.16:14748/packagenotify/";
-		string url = "10.191.130.34:14748/cgi-bin/packagenotify";
+		string url = "game.mmbiz.oa.com/cgi-bin/game/packagenotify";
 		//10.191.130.34:14748
 		struct url_data data;
 		data.size = 0;
@@ -100,17 +98,14 @@ namespace wordexpand{
 			string str = data.data;
 			commom::DEBUG_INFO("RETURN: " + str);
 			if(res != CURLE_OK){
-				commom::DEBUG_INFO("connect error");
+				commom::DEBUG_INFO(taskid + "connect error");
 				curl_easy_cleanup(curl);
-				//curl_global_cleanup();
 				return "";
 			}else{
-				commom::DEBUG_INFO("OK");
-				//curl_global_cleanup();
+				commom::DEBUG_INFO(taskid + "\t SEND STAUE OK");
 				return str;
 			}			
 		}
-		//curl_global_cleanup();
 		return "";
 	}
 
@@ -213,7 +208,7 @@ namespace wordexpand{
 		dcitExtParam["file_name"] = "add_source2uin_partition.py";
 		dcitExtParam["params"] = taskid;				
 		taskParams["taskType"] = "121";
-		taskParams["taskName"] = "add_partition:(" + taskid + ")";
+		taskParams["taskName"] = "addpartition:(" + taskid + ")";
 		taskParams["taskExt"] = TaskExtToStr(dcitExtParam);
 		commom::DEBUG_INFO(ParamToStr(taskParams));
 		return GetStaue(LzApiPost(ParamToStr(taskParams)));
@@ -236,7 +231,7 @@ namespace wordexpand{
 		dcitExtParam["targetColumnNames"] = "taskid,id,tag,flag,score";	
 		taskParams["parentTaskId"] = "{"+ parentid + ":1}";
 		taskParams["taskType"] = "75";
-		taskParams["taskName"] = parentid;
+		taskParams["taskName"] = "hdfstotdw" + taskid;
 		taskParams["taskExt"] = TaskExtToStr(dcitExtParam);
 		commom::DEBUG_INFO(ParamToStr(taskParams));
 		return GetStaue(LzApiPost(ParamToStr(taskParams)));
@@ -251,7 +246,7 @@ namespace wordexpand{
 		dcitExtParam["params"] = string(taskid);	
 		taskParams["parentTaskId"] ="{"+parentid+":1}";
 		taskParams["taskType"] = "121";
-		taskParams["taskName"] = "getuin:(" + taskid + ")";
+		taskParams["taskName"] = "getuin_:(" + taskid + ")";
 		taskParams["taskExt"] = TaskExtToStr(dcitExtParam);
 		commom::DEBUG_INFO(ParamToStr(taskParams));
 		return GetStaue(LzApiPost(ParamToStr(taskParams)));
@@ -269,14 +264,13 @@ namespace wordexpand{
 		dcitExtParam["destCheckFilePath"] = destFilePathName;			
 		dcitExtParam["destFileDelimiter"] = "9";				
 		dcitExtParam["destFilePath"] = destFilePathName;	
-		//string strsql = "select uin,tag,score FROM wxy_daily_game_uinres where taskid =" + taskid + " order by score";
 		string strsql = "select uin,tag,score FROM wxy_daily_game_active_uin where taskid =" + taskid + " order by score";		
 		dcitExtParam["filterSQL"] = strsql;		
 		taskParams["targetServer"]="hdfs_tl-if-nn-tdw.tencent-distribute.com";
 		taskParams["sourceServer"]="tdw_tl";
 		taskParams["parentTaskId"] = "{"+string(parentid)+":1}";
 		taskParams["taskType"] = "76";
-		taskParams["taskName"] = "tdw2hdfs_" +taskid;
+		taskParams["taskName"] = "tdw2hdfs" +taskid;
 		taskParams["taskExt"] = TaskExtToStr(dcitExtParam);
 		commom::DEBUG_INFO(ParamToStr(taskParams));
 		return GetStaue(LzApiPost(ParamToStr(taskParams)));
@@ -286,28 +280,28 @@ namespace wordexpand{
 	}
 	bool Lz::LzTaskApi(string& taskid, const char* filepath,string& uinnumber){
 		if(!PutLocalFileToHFDS(filepath)){
-			commom::LOG_INFO("PutLocalFileToHFDS Error");
+			commom::LOG_INFO(taskid + ":\tPutLocalFileToHFDS Error");
 			mylog.LOG(taskid,"DEBUG_INFO : PutLocalFileToHFDS Error");
 			return false;
 		}
 		string  addpartitionid = AddPartition(taskid);
 		if(addpartitionid == ""){
-			commom::LOG_INFO("AddPartition Error");
+			commom::LOG_INFO(taskid + ":\tAddPartition Error");
 			return false;
 		}
 		string hdfstotdwid = HDFSToTDW(filepath, addpartitionid,taskid);
 		if(hdfstotdwid == ""){
-			commom::LOG_INFO("HDFSToTDW Error");
+			commom::LOG_INFO(taskid + ":\tHDFSToTDW Error");
 			return false;
 		}
 		string getuinsid = Getuins(hdfstotdwid, taskid);
 		if(getuinsid == ""){
-			commom::LOG_INFO("Getuins Error");
+			commom::LOG_INFO(taskid + ":\tGetuins Error");
 			return false;
 		}
 		string lzid = TDW2HDFS(getuinsid,taskid);
 		if(lzid == ""){
-			commom::LOG_INFO("TDW2HDFS Error");
+			commom::LOG_INFO(taskid + ":\tTDW2HDFS Error");
 			return false;
 		}else{
 			return mySql.AddTask(taskid,lzid,uinnumber);

@@ -19,10 +19,8 @@ namespace wordexpand{
 	}
 	//参数解析
 	bool Task::ArgumentParsing(const char* str){
-		//taskid=201606021814&keywords=游戏 美丽&souce=1&number=1000
 		string confstr = str;
 		commom::DEBUG_INFO("confstr :" + confstr);
-		//mylog.LOG(taskid,("INPUTPARAM :" + string(confstr) + "\n").c_str());
 		std::vector<string> v;
 		std::vector<string> tmp;
 		std::map<string,string>dict;
@@ -47,7 +45,6 @@ namespace wordexpand{
 		//
 		if(dict["code"] != "13BCF8DE22DB318A01EF4172AA0C199A"){
 			desc = "passcode error!";
-			//mylog.LOG(taskid,("ERROR :" + desc + "\n").c_str());
 			return false;
 		}
 		string keywd = dict["keywd"];
@@ -55,7 +52,6 @@ namespace wordexpand{
 		//keywd = "保卫萝卜_植物大战僵尸_帝国塔防3_塔防_帝国塔防_开心消消乐_糖果消消乐_极地冒险_炮塔_天天消消乐_魔法_植物大战僵尸";
 		if(keywd == ""){
 			desc = "keywd error!";
-			//mylog.LOG(taskid,("ERROR :" + desc + "\n").c_str());
 			return false;
 		}
 		f.Split("_",keywd,tmp);
@@ -125,8 +121,8 @@ namespace wordexpand{
 		conf += ";";
 		conf += ("task_version:1");
 		conf += ";";
-		conf += ("task_name:\"\"");
-		conf += ";";
+		conf += ("task_name:\"" + query);
+		conf += "\";";	
 		conf += ("task_cname:\"\"");
 		conf += ";";
 		conf += ("input:\"" + query);
@@ -165,7 +161,6 @@ namespace wordexpand{
 	//检索
 	bool Task::Retrieval(std::map<string, string>& taskinfo){
 		commom::DEBUG_INFO("Begin Retrieval");
-		//mylog.LOG(taskid,"DEBUG_INFO : Begin Retrieval ");
 		return mindex.Retrieval(inputconf.source,inputconf.keywds,mySql, taskinfo, bizresults, articleresults);
 	}
 
@@ -193,7 +188,7 @@ namespace wordexpand{
 		}	
 		i = 0;
 		for(std::vector<articleinfo>::iterator it = articleresults.begin(); it != articleresults.end(); it++){
-			if(i++ > 1000){
+			if(i++ > 10000){
 				break;
 			}
 			str = taskid + string("\t") + (*it).articleuin + string("\t1\t1\t") +f.ConvertToStr((*it).score) + "\n";
@@ -205,42 +200,29 @@ namespace wordexpand{
 
 	//LZ接口
 	bool Task::CallLz(){
-		commom::DEBUG_INFO("CallLz Api");
-		//mylog.LOG(taskid,"DEBUG_INFO : CallLz Api ");
-		//mylog.~Log();
-		mlz.LzTaskApi(taskid, (localfiledir+taskid).c_str(),inputconf.num);
-		return true;
+		commom::DEBUG_INFO(taskid + ":\tCallLz Api");
+		return mlz.LzTaskApi(taskid, (localfiledir+taskid).c_str(),inputconf.num);
 	}
-
 	bool Task::TaskApi(const char* str){
 		if(ArgumentParsing(str) != true){
-			commom::LOG_INFO("ArgumentParsing error");
-			//mylog.LOG(taskid,"DEBUG_INFO : ArgumentParsing error");
+			commom::LOG_INFO(taskid + ":\tArgumentParsing error");
 			return false;
 		}
-		//mylog.LOG(taskid,"DEBUG_INFO : ArgumentParsing OK");
 		string query = "";
 		std::map<string, string> taskinfo;
 		if(!Config(query, taskinfo)){
-			commom::LOG_INFO("Config error");
-			//mylog.LOG(taskid,"DEBUG_INFO : Config error");
+			commom::LOG_INFO(taskid + ":\tConfig error");
 			return false;
 		}
-		//mylog.LOG(taskid,"DEBUG_INFO : Config OK");
 		if(!Retrieval(taskinfo)){
-			commom::LOG_INFO("Retrieval error");
-			//mylog.LOG(taskid,"DEBUG_INFO : Retrieval error");
+			commom::LOG_INFO(taskid + ":\tRetrieval error");
 			return false;
 		}
-		//return false;
-		//mylog.LOG(taskid,"DEBUG_INFO : Retrieval OK");
 		if(!UinToFile()){
-			commom::LOG_INFO("UinToFile error");
-			//mylog.LOG(taskid,"DEBUG_INFO : UinToFile error");
+			commom::LOG_INFO(taskid + ":\tuinToFile error");
 			return false;
 		}
 		//return false;
-		//mylog.LOG(taskid,"DEBUG_INFO : UinToFile OK");
 		return CallLz();
 	}
 

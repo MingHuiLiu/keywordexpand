@@ -16,8 +16,6 @@ namespace wordexpand{
 			commom::LOG_INFO("Query Error:" + string(mysql_error(&myCont)));
 			return false;
 		}else{
-			//检查插入结果
-			commom::DEBUG_INFO("ExeQuery OK");
 			return true;
 		}
 	}
@@ -115,12 +113,11 @@ namespace wordexpand{
 		strsql += (", lzid= " + lzid);
 		strsql += (", uinnumber= \"" + uinnumber + "\"");
 		strsql += (", staue= \"0\"");
-		commom::DEBUG_INFO(strsql);
+		//commom::DEBUG_INFO(strsql);
 		return ExeQuery(strsql);
 	}
 
 	bool Sql::SelectTask(std::vector<taskstaue>& tasklist){
-		//commom::DEBUG_INFO("SelectTask");
 		int id = 0;
 		string sqlstr = "select * from lz_task_staue where staue != \"4\"";
 		ExeQuery(sqlstr);
@@ -144,12 +141,10 @@ namespace wordexpand{
 	}
 
 	bool Sql::UpdataTask(string taskid, string staue){
-		//update MyClass set name='Mary' where id=1;
 		string strsql = "";
 		strsql += "update  lz_task_staue set ";
 		strsql += ("staue=" + staue);
 		strsql += (" where taskid =" + taskid);
-		commom::DEBUG_INFO(strsql);
 		return ExeQuery(strsql);
 	}
 }
