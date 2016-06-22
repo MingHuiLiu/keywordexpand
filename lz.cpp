@@ -241,8 +241,8 @@ namespace wordexpand{
 		std::map<string,string> taskParams;
 		Init(taskParams);
 		std::map<string,string> dcitExtParam;
-		//dcitExtParam["file_name"] = "source2uin.py";
-		dcitExtParam["file_name"] = "source2uintest.py";
+		dcitExtParam["file_name"] = "source2uin.py";
+		//dcitExtParam["file_name"] = "source2uintest.py";
 		dcitExtParam["params"] = string(taskid);	
 		taskParams["parentTaskId"] ="{"+parentid+":1}";
 		taskParams["taskType"] = "121";
