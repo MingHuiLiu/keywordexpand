@@ -1,4 +1,5 @@
 #include "sever.h"
+#include <pthread.h>
 namespace wordexpand{
 	bool Sever::Init(const char* dictpath){
 		return true;
@@ -25,20 +26,17 @@ namespace wordexpand{
 		evhttp_clear_headers(&http_query);
 		evbuffer_free(buf);
 	}
-	void CallBack(struct evhttp_request *req, void *arg){
-		commom::Func f;
-		commom::DEBUG_INFO("lisenling");
-		struct evkeyvalq http_query_post;
-		int buffer_data_len = EVBUFFER_LENGTH(req->input_buffer);
-		char* decode_post_uri;
-		char *post_data = (char *) malloc(buffer_data_len + 1);
-		memset(post_data, '\0', buffer_data_len + 1);
-		memcpy(post_data, EVBUFFER_DATA(req->input_buffer), buffer_data_len);
-		std::cout<<post_data<<std::endl;
 
-		Task mTask;
+	void* CallApi(void* arg){
+		//commom::DEBUG_INFO(arg);		
+		commom::DEBUG_INFO("waiting");			
+		string *pstru = (string *)arg;
+		commom::LOG_INFO(pstru->c_str());
+		string t = pstru->c_str();
+		commom::LOG_INFO(t);
+		Task mTask;		
 		string restr = "{\"ret\":";
-		if(mTask.TaskApi(post_data)){
+		if(mTask.TaskApi(t.c_str())){
 			restr += "\"0\"";
 		}else{
 			restr += "\"-1\"";
@@ -50,9 +48,44 @@ namespace wordexpand{
 		restr += "\"taskid\":";
 		restr += "\"" + mTask.taskid +"\"";
 		restr += "}";
+		commom::LOG_INFO(restr);
+		pthread_exit(NULL);		
+	}
+
+	void CallBack(struct evhttp_request *req, void *arg){
+		commom::Func f;
+		commom::DEBUG_INFO("lisenling");
+		struct evkeyvalq http_query_post;
+		int buffer_data_len = EVBUFFER_LENGTH(req->input_buffer);
+		char* decode_post_uri;
+		char *post_data = (char *) malloc(buffer_data_len + 1);
+		memset(post_data, '\0', buffer_data_len + 1);
+		memcpy(post_data, EVBUFFER_DATA(req->input_buffer), buffer_data_len);
+		//std::cout<<post_data<<std::endl;
+
+		Task mTask;
+		string restr = "{\"ret\":";
+		if(mTask.ArgumentParsing(post_data)){
+			restr += "\"0\"";
+		}else{
+			restr += "\"-1\"";
+		}
+		/*
+		if(mTask.TaskApi(post_data)){
+			restr += "\"0\"";
+		}else{
+			restr += "\"-1\"";
+		}
+		*/
+		restr += ",";
+		restr += "\"desc\":";
+		restr += "\"" + mTask.desc +"\"";
+		restr += ",";
+		restr += "\"taskid\":";
+		restr += "\"" + mTask.taskid +"\"";
+		restr += "}";
 		
-		commom::LOG_INFO(f.GetTime() + "\t:" + restr);
-		free(post_data);
+		commom::LOG_INFO(f.GetTime() + "\t:" + restr);		
 		struct evbuffer *buf = evbuffer_new();
 		if(!buf){  
 			puts("failed to create response buffer");  
@@ -63,7 +96,19 @@ namespace wordexpand{
 		evbuffer_add_printf(buf, "%s", restr.c_str());
 		evhttp_send_reply(req, HTTP_OK, restr.c_str(), buf);
 		evbuffer_free(buf);
+		//string str = post_data;
+		string str = post_data;	
+		//callbackconf
+		commom::DEBUG_INFO(str);
+		pthread_t tid;
+		int ret = pthread_create(&tid, NULL, CallApi, &(str));
+		commom::LOG_INFO("pthread creat ok");
+		if (ret != 0){
+			commom::DEBUG_INFO("pthread_create error: error_code=");
+		}
+		free(post_data);
 	}
+
 	bool Sever::StartSever(){
 		commom::DEBUG_INFO("begin");
 		char *host_ip = "10.223.48.117";

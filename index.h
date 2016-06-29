@@ -14,7 +14,7 @@ namespace wordexpand{
 		commom::Func f;
 		seg::Wordseg mseg;
 		std::map<string, int>gamefilterdict;
-		Sql mySql;
+		//Sql mySql;
 
 	public://biz
 		bool Init(const char* dictpath);
@@ -38,19 +38,7 @@ namespace wordexpand{
 		bool ArticleRetrieval(Xapian::Enquire& enquire, std::vector<string>& querylist,
 			std::vector<articleinfo>& results,const char* relationship);
 
-	/*
-	public://mysql
-		bool InitMysql();
-		bool ExeQuery(string& query);
-		bool AddTask(std::map<string, string>& taskinfo);
-		bool UpdataKeywords(std::vector<std::string>& v, std::map<string, string>& taskinfo);
-		bool UpdataBiz(std::vector<bizinfo>& results, std::map<string, string>& taskinfo);
-		bool UpdataArticle();
-		int GetTaskId();
-	*/
-
 	public:
-		//bool Bizrank(const bizinfo& x, const bizinfo& y);
 		void TestRank(Xapian::MSet& matches);
 	};
 

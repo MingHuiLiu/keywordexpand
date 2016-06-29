@@ -11,6 +11,7 @@ typedef struct{
 	int port;
 	int timeout;
 }httpconf;
+
 namespace wordexpand{
  class Sever{
 	public:

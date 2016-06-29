@@ -67,7 +67,8 @@ namespace wordexpand{
 			strsql += (", task_version= " + taskinfo["task_version"]);
 			strsql += (", biz= \"" + results.at(i).uin);
 			strsql += ("\", biz_title=\" " + results.at(i).bizname);
-			strsql += ("\", biz_info= \"" + results.at(i).bizdesc);
+			//strsql += ("\", biz_info= \"" + results.at(i).bizdesc);
+			strsql += ("\", biz_info= \" \"" );
 			strsql += ("\", biz_auth=\"\"");
 			strsql += (", biz_sub= 1");
 			strsql += (", match_list = \"\"");

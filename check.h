@@ -10,8 +10,7 @@
 #define UINTOTAL 20000000
 typedef struct{
 	string tag;
-	string flag;
-	float score;
+	string score;
 }uininfo;
 namespace wordexpand{
 	class Check{

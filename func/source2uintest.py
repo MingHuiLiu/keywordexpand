@@ -27,11 +27,19 @@ def get_article_click_uin(tdw):
     sql="""alter table wxy_daily_game_uinres add partition p_%s values in (%s)""" %(taskid_, taskid_)
     res = tdw.execute(sql)
     WriteLog("running=",sql)
+
+    sql="""alter table  wxy_daily_game_active_uin drop partition (p_%s)"""%(taskid_)
+    res = tdw.execute(sql)
+    sql="""alter table wxy_daily_game_active_uin add partition p_%s values in (%s)""" %(taskid_, taskid_)
+    res = tdw.execute(sql)
+    WriteLog("running=",sql)
+
     sql="use wxg_data_valueless"
     res = tdw.execute(sql)
 
-   #article
 
+    #article
+    """
     sql = '''INSERT table wxy_daily_game_uinlist
               SELECT
  	            a.taskid as taskid,
@@ -42,14 +50,14 @@ def get_article_click_uin(tdw):
              FROM
                (SELECT * FROM wxy_sourceid_partition where taskid = '%s' and tag = '1') a
              JOIN
-                wxg_data_valueless::wxy_gamearticle_read b
+                wxg_data_valueless::wxy_game_article_read b
              ON
                 a.id = concat(ltrim(b.bizuin_),'_',ltrim(b.appmsgid_),'_',ltrim(b.itemidx_))
              where b.ds >= "20160511" and b.ds <= "20160610"
           '''%taskid_
     WriteLog("running=",sql)
     res = tdw.execute(sql)
-
+    """
     #biz
     sql = '''INSERT table wxy_daily_game_uinlist
               SELECT
@@ -61,10 +69,10 @@ def get_article_click_uin(tdw):
              FROM
                (SELECT * FROM wxy_sourceid_partition where taskid = '%s' and tag = '0') a
              JOIN
-                wxg_data_valueless::wxy_daily_raw_weixin_biz_user_relations b
+                wxg_data_valueless::wxy_monthly_raw_weixin_gamebiz_user_relations  b
              ON
                  a.id = b.fbiz_uin
-             where b.fdate_cd = "20160601"
+             where b.fdate_cd = "20160620"
           '''%taskid_
     WriteLog("running=",sql)
     res = tdw.execute(sql)
@@ -92,11 +100,11 @@ def get_article_click_uin(tdw):
  	            a.score + b.fgame_is_pay as score
              FROM
                 (select '%s' as taskid,uin as uin ,cast(SUM(TO_NUMBER(tag))as STRING) as tag, SUM(score) as score from wxy_daily_game_uinres GROUP BY uin) a
-                join wxy_active_gameuser b
+                join wxy_monthly_active_gameuser b
              ON
                 a.uin = b.fuin
              where
-                a.taskid = '%s' and b.fdate_cd = '201604'
+                a.taskid = '%s' and b.fdate_cd = '201605'
           '''%(taskid_, taskid_)
     WriteLog("running=",sql)
     res = tdw.execute(sql)

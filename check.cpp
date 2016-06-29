@@ -100,7 +100,7 @@ namespace wordexpand{
 			}
 		}
 		fclose(fi);
-	
+	    
 		for(int j =0; j< v.size(); j++){
 			//commom::LOG_INFO(v.at(j));
 			fi = fopen((PATH +v.at(j)).c_str(), "r");
@@ -134,19 +134,14 @@ namespace wordexpand{
 			f.Split("\t",str,v);
 			if(v.size() != 3)continue;
 			tmp.tag= v.at(1);
-			tmp.flag = "1";
-			tmp.score = atof(v.at(2).c_str());
-			if(dict.find(v.at(0)) == dict.end()){
-				dict[v.at(0)] = tmp;
-			}else{
-				dict[v.at(0)].tag = "2";
-				dict[v.at(0)].score += tmp.score;
-			}
+			tmp.score = v.at(2);
+			dict[v.at(0)] = tmp;
 		}
 		//È¡ËùÓÐ
 		if(uinnumber == ""){
 			for(std::map<string,uininfo>::iterator it = dict.begin(); it != dict.end(); it++){
-				f.WiteLine((it->first + "\t" + it->second.tag + "\t" + it->second.flag + "\n").c_str(), fo);
+				//f.WiteLine((it->first + "\t" + it->second.tag + "\t" + it->second.score + "\n").c_str(), fo);
+				f.WiteLine((it->first + "\n").c_str(), fo);
 			}
 			fclose(fo);
 			AddRandom(fileout.c_str(), dict.size()/10);			
@@ -154,7 +149,8 @@ namespace wordexpand{
 			int number = atoi(uinnumber.c_str());
 			if(number >= dict.size()){
 				for(std::map<string,uininfo>::iterator it = dict.begin(); it != dict.end(); it++){
-					f.WiteLine((it->first + "\t" + it->second.tag + "\t" + it->second.flag + "\n").c_str(), fo);
+					//f.WiteLine((it->first + "\t" + it->second.tag + "\t" + it->second.score + "\n").c_str(), fo);
+					f.WiteLine((it->first + "\n").c_str(), fo);
 				}
 				fclose(fo);
 				AddRandom(fileout.c_str(), dict.size()/10);		
@@ -166,7 +162,8 @@ namespace wordexpand{
 				}
 				sort(tmpvec.begin(), tmpvec.end(),comp);
 				for(int j =0; j< number; j++){
-					f.WiteLine((tmpvec.at(j).first + "\t" + tmpvec.at(j).second.tag + "\t" + tmpvec.at(j).second.flag + "\n").c_str(), fo);
+					//f.WiteLine((tmpvec.at(j).first + "\t" + tmpvec.at(j).second.tag + "\t" + tmpvec.at(j).second.score + "\n").c_str(), fo);
+					f.WiteLine((tmpvec.at(j).first + "\n").c_str(), fo);
 				}
 				fclose(fo);
 				AddRandom(fileout.c_str(), number/10);		

@@ -13,14 +13,14 @@ namespace wordexpand{
  class Lz{
 	public:
 		Lz(){
-			mySql.InitMysql();
+			//mySql.InitMysql();
 			headers = NULL;
 			curl = NULL;
 			mylog.Init("./log/");
 		}
 		~Lz(){}
 	public://
-		Sql mySql;
+		//Sql mySql;
 		commom::Func f;
 		commom::Log mylog;
 		struct curl_slist *headers;
@@ -30,7 +30,7 @@ namespace wordexpand{
 		bool Init(std::map<string,string>& inittaskParams);
 		string GetStaue(string str);
 		string LzApiPost(string params);
-		bool LzTaskApi(string& taskid, const char* filepath, string& uinnumber);
+		bool LzTaskApi(Sql& mySql,string& taskid, const char* filepath, string& uinnumber);
 		bool PutLocalFileToHFDS(const char* filepath);
 		string AddPartition(string& taskid);
 		string HDFSToTDW(const char*filename,string& parentid,string& taskid);

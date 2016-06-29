@@ -8,9 +8,8 @@ namespace wordexpand{
 		inputconf.source = "";
 		inputconf.num = "";
 		localfiledir = "./tmpdata/";
-		//mylog.Init("./log/");
 		mySql.InitMysql();
-		mindex.InitRetrieval("../dict/easyseg/");
+		mindex.InitRetrieval("../dict/bizdict/");
 		
 	}
 	Task::~Task(){
@@ -42,14 +41,11 @@ namespace wordexpand{
 			}
 
 		}
-		//
 		if(dict["code"] != "13BCF8DE22DB318A01EF4172AA0C199A"){
 			desc = "passcode error!";
 			return false;
 		}
 		string keywd = dict["keywd"];
-		//
-		//keywd = "保卫萝卜_植物大战僵尸_帝国塔防3_塔防_帝国塔防_开心消消乐_糖果消消乐_极地冒险_炮塔_天天消消乐_魔法_植物大战僵尸";
 		if(keywd == ""){
 			desc = "keywd error!";
 			return false;
@@ -57,13 +53,11 @@ namespace wordexpand{
 		f.Split("_",keywd,tmp);
 		if(tmp.size() < 1){
 			desc = "keywd error!";
-			//mylog.LOG(taskid,("ERROR :" + desc + "\n").c_str());
 			return false;
 		}
 
 		if(dict["source"].size() != 1){
 			desc = "source error!";
-			//mylog.LOG(taskid,("ERROR :" + desc + "\n").c_str());
 			return false;
 		}
 		int sourceint = atoi(dict["source"].c_str());
@@ -90,21 +84,18 @@ namespace wordexpand{
 
 		if(inputconf.source.size() != 3){
 			desc = "source error!";
-			//mylog.LOG(taskid,("ERROR :" + desc + "\n").c_str());
 			return false;
 		}
 		if(dict["uinnumber"] == ""){
 
 		}else if((atoi(dict["uinnumber"].c_str()) == 0)||(atoi(dict["uinnumber"].c_str()) > 10000*10000)){
 			desc = "uinnumber error!";
-			//mylog.LOG(taskid,("ERROR :" + desc + "\n").c_str());
 			return false;
 		}
 		taskid = f.GetDate() +  f.ConvertToStr(mySql.GetTaskId());
 		commom::DEBUG_INFO("taskid : " + taskid);
 		inputconf.id = taskid;
 		inputconf.keywds = keywd;
-		//inputconf.source = dict["source"];
 		inputconf.num =dict["uinnumber"];
 		commom::LOG_INFO(inputconf.id);
 		commom::LOG_INFO(inputconf.keywds);
@@ -112,8 +103,8 @@ namespace wordexpand{
 		commom::LOG_INFO(inputconf.num);
 		return true;
 	}
-	//参数设置
-	bool Task::Config(string& query,std::map<string, string>& taskinfo){	
+	//参数设置,网页显示
+	bool Task::Config(std::map<string, string>& taskinfo){	
 		//解析传入参数
 		commom::DEBUG_INFO("Config");
 		string conf = "";
@@ -121,11 +112,11 @@ namespace wordexpand{
 		conf += ";";
 		conf += ("task_version:1");
 		conf += ";";
-		conf += ("task_name:\"" + query);
+		conf += ("task_name:\"" + inputconf.keywds);
 		conf += "\";";	
-		conf += ("task_cname:\"\"");
-		conf += ";";
-		conf += ("input:\"" + query);
+		conf += ("task_cname:\"" + inputconf.keywds);
+		conf += "\";";	
+		conf += ("input:\"" + inputconf.keywds);
 		conf += "\";";	
 		conf += ("step:1");
 		conf += ";";
@@ -143,11 +134,14 @@ namespace wordexpand{
 		conf += ";";
 		conf += ("modify_user:\"seanxywang\"");
 		conf += ";";
-		conf += ("create_time:20160526");
-		conf += ";";
-		conf += ("modify_time:20160526");	
+		//f.GetDate()
+		conf += ("create_time:\"" + f.GetTime());
+		conf += "\";";	
+		conf += ("modify_time:\"" + f.GetTime());
+		conf += "\";";	
 		std::vector<std::string> res ;
 		std::vector<std::string> tmp ;
+		//commom::DEBUG_INFO(conf);
 		f.Split(";", conf, res);
 		for(int i = 0; i < res.size(); i++){
 			f.Split(":",res.at(i),tmp);
@@ -155,6 +149,7 @@ namespace wordexpand{
 				taskinfo[tmp.at(0)] = tmp.at(1);
 			}
 		}
+		//commom::DEBUG_INFO(f.ConvertToStr(taskinfo.size()));
 		return true;
 	}
 
@@ -171,7 +166,6 @@ namespace wordexpand{
 	//读写文件
 	bool Task::UinToFile(){
 		commom::DEBUG_INFO("Begin UinToFile");
-		//mylog.LOG(taskid,"DEBUG_INFO : Begin UinToFile ");
 		string str = "";
 		FILE*fo = fopen((localfiledir + taskid).c_str(),"ab+");
 		if (fo == NULL) {
@@ -201,19 +195,19 @@ namespace wordexpand{
 	//LZ接口
 	bool Task::CallLz(){
 		commom::DEBUG_INFO(taskid + ":\tCallLz Api");
-		return mlz.LzTaskApi(taskid, (localfiledir+taskid).c_str(),inputconf.num);
+		return mlz.LzTaskApi(mySql, taskid, (localfiledir+taskid).c_str(),inputconf.num);
 	}
 	bool Task::TaskApi(const char* str){
 		if(ArgumentParsing(str) != true){
 			commom::LOG_INFO(taskid + ":\tArgumentParsing error");
 			return false;
 		}
-		string query = "";
 		std::map<string, string> taskinfo;
-		if(!Config(query, taskinfo)){
+		if(!Config(taskinfo)){
 			commom::LOG_INFO(taskid + ":\tConfig error");
 			return false;
 		}
+
 		if(!Retrieval(taskinfo)){
 			commom::LOG_INFO(taskid + ":\tRetrieval error");
 			return false;
@@ -222,7 +216,6 @@ namespace wordexpand{
 			commom::LOG_INFO(taskid + ":\tuinToFile error");
 			return false;
 		}
-		//return false;
 		return CallLz();
 	}
 

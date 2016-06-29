@@ -31,7 +31,7 @@ namespace wordexpand{
 		std::vector<articleinfo> articleresults;
 	public:
 		bool ArgumentParsing(const char* str);
-		bool Config(string& query,std::map<string, string>& taskinfo);
+		bool Config(std::map<string, string>& taskinfo);
 		bool Retrieval(std::map<string, string>& taskinfo);
 		bool Rank();
 		bool UinToFile();

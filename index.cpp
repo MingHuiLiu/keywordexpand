@@ -46,17 +46,18 @@ namespace wordexpand{
 		while ( f.ReadLine(buffer,MAX_LENTH,fi)!=NULL)	{
 			str = f.GetLine(buffer); 
 			f.Split("\t", str, v);
-			if(v.size() != 5)continue;
-			biz.uin = v.at(0);
-			biz.bizname = v.at(1);
-			biz.bizdesc = v.at(2);
-			biz.bizfunsnum = v.at(3);
-			biz.massmsgcount = v.at(4);
+			if(v.size() != 6)continue;
+			biz.uin = v.at(1);
+			biz.bizname = v.at(2);
+			biz.bizdesc = v.at(3);
+			biz.bizfunsnum = v.at(4);
+			biz.massmsgcount = v.at(5);
 			Xapian::Document doc;			
 			doc.set_data(biz.uin);	
 			indexer.set_document(doc);
-			indexer.index_text(mseg.QuickSegement(biz.bizname.c_str()), 1, "T");
-			indexer.index_text(mseg.QuickSegement(biz.bizdesc.c_str()), 1, "C");			
+			indexer.index_text(mseg.Segement((biz.bizname + " " + biz.bizdesc).c_str()));
+
+			//indexer.index_text(mseg.QuickSegement(biz.bizdesc.c_str()), 1, "C");	
 			/*
 			for (Xapian::TermIterator iter = doc.termlist_begin(); iter != doc.termlist_end(); ++iter){
 				std::cout<<*iter<<std::endl;
@@ -67,7 +68,7 @@ namespace wordexpand{
 			doc.add_value(2,biz.bizfunsnum);
 			doc.add_value(3,biz.massmsgcount);
 			db.add_document(doc);	
-			if((linenum++)% 10000 == 0){
+			if((++linenum)% 10000 == 0){
 				commom::DEBUG_INFO(string(filein) + "\t" + f.ConvertToStr(linenum));
 				db.flush();
 			}			
@@ -137,12 +138,14 @@ namespace wordexpand{
 		mySql.UpdataKeywords(v,taskinfo);
 
 		//选择内容源
+		/*
 		if(source.at(0) == '1'){
 			if(ArticleRetrieval(v,articleresults) != true){
 				commom::LOG_INFO("ArticleRetrieval Error");
 			}
 			
 		}
+		*/
 		if(source.at(1) == '1'){
 			commom::LOG_INFO("friends");
 		}
@@ -151,15 +154,18 @@ namespace wordexpand{
 				commom::LOG_INFO("BizRetrieval Error");
 			}
 		}
-		//UpdataBiz(bizresults, taskinfo);		
-		//step4: query 组合排序、输出
+
+		//扩散biz,加入平台biz
+
+
+		//mySql.UpdataBiz(bizresults, taskinfo);		
 		return true;
 
 	}
 	bool Index::BizRetrieval(std::vector<string>& querylist,std::vector<bizinfo>& results){
 		
 		Xapian::Database db;
-		db.add_database(Xapian::Database("../../data/database/bizindex/indexnew/"));
+		db.add_database(Xapian::Database("../../data/database/gamebizindex/"));
 		commom::DEBUG_INFO("OPEN BIZINDEX OK");
 		Xapian::Enquire enquire(db);
 		return BizRetrieval(enquire, querylist,results,"OR");
@@ -187,6 +193,7 @@ namespace wordexpand{
 			results.push_back(tmp);			
 		}
 		sort(results.begin(), results.end(),Bizrank);
+		
 		int x =  results.size() < 100 ? results.size() : 100 ;
 		for(int i =0; i< x; i++){
 			commom::DEBUG_INFO(results.at(i).bizname + "\t" + results.at(i).bizdesc + "\t" + f.ConvertToStr(results.at(i).score));
@@ -204,6 +211,7 @@ namespace wordexpand{
 			results.push_back(tmp);			
 		}
 		sort(results.begin(), results.end(),Articlerank);
+	
 		int x =  results.size() < 100 ? results.size() : 100 ;
 		for(int i =0; i< x; i++){
 			commom::DEBUG_INFO(results.at(i).title + "\t" + f.ConvertToStr(results.at(i).score));
@@ -227,43 +235,15 @@ namespace wordexpand{
 		//seg
 		std::vector<string> v;
 		for(int i = 0; i < querylist.size(); i++){	
-			/*
-			f.Split(" ",mseg.Segement(querylist.at(i).c_str()), v);
-			if(v.size() == 0) return "";
-			if(v.size() == 1){
-				//query += "(";
-				query += ("(title:" + querylist.at(i) + ")");
-				query += (" " + str + " ");
-				query += ("content:" + querylist.at(i));	
-				query += ")";
-			}else{
-				query += "((";
-				for(int j =0; j< v.size() -1; j++){
-					query += ("title:" + v.at(j) + " AND ");
-				}
-				query += ("title:" +v.at(v.size() -1));
-				query += "))";
-				query += (" " + str + " ");
-				query += "((";
-				for(int j =0; j< v.size() -1; j++){
-					query += ("content:" + v.at(j) + " AND ");
-				}
-				query += ("content:" +v.at(v.size() -1));
-				query += ")";
-			}	
-
-			if(i+1 <querylist.size()){
-				query += " OR ";
-			}
-			*/
+			
 			
 			f.Split(" ",mseg.Segement(querylist.at(i).c_str()), v);
 			if(v.size() == 0) return "";
 			if(v.size() == 1){
-				query += "(";
-				query += ("(title:" + querylist.at(i) + ")");
+				query += "";
+				query += ("(title:" + querylist.at(i));
 				query += (" " + str + " ");
-				query += ("content:" + querylist.at(i));	
+				query += ("(content:" + querylist.at(i));	
 				query += ")";
 			}else{
 				query += "(";
@@ -319,12 +299,12 @@ namespace wordexpand{
 	bool Index::BizRetrieval(Xapian::Enquire& enquire, std::vector<string>& querylist,
 							std::vector<bizinfo>& results, const char* relationship){
 		Xapian::QueryParser qp;
-		qp.add_prefix("title", "T");
-		qp.add_prefix("content", "C");
+		//qp.add_prefix("title", "T");
+		//qp.add_prefix("content", "C");
 		for(int i =0; i< querylist.size(); i++){
 			commom::DEBUG_INFO(querylist.at(i));
 		}
-		string query_string = JionQuery(querylist, relationship);
+		string query_string = ArticleJionQuery(querylist);
 		commom::DEBUG_INFO(query_string);
 		Xapian::Query query = qp.parse_query(query_string);
 		enquire.set_query(query);
