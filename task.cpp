@@ -19,7 +19,7 @@ namespace wordexpand{
 	//参数解析
 	bool Task::ArgumentParsing(const char* str){
 		string confstr = str;
-		commom::DEBUG_INFO("confstr :" + confstr);
+		//commom::DEBUG_INFO("confstr :" + confstr);
 		std::vector<string> v;
 		std::vector<string> tmp;
 		std::map<string,string>dict;

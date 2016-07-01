@@ -1,5 +1,6 @@
 #include "sever.h"
 #include <pthread.h>
+string str = "";
 namespace wordexpand{
 	bool Sever::Init(const char* dictpath){
 		return true;
@@ -28,7 +29,6 @@ namespace wordexpand{
 	}
 
 	void* CallApi(void* arg){
-		//commom::DEBUG_INFO(arg);		
 		commom::DEBUG_INFO("waiting");			
 		string *pstru = (string *)arg;
 		commom::LOG_INFO(pstru->c_str());
@@ -97,7 +97,7 @@ namespace wordexpand{
 		evhttp_send_reply(req, HTTP_OK, restr.c_str(), buf);
 		evbuffer_free(buf);
 		//string str = post_data;
-		string str = post_data;	
+		str = post_data;	
 		//callbackconf
 		commom::DEBUG_INFO(str);
 		pthread_t tid;
