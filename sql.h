@@ -7,7 +7,9 @@ typedef struct{
 	string bizname;
 	string bizdesc;
 	string bizfunsnum;
-	string massmsgcount;
+	//string massmsgcount;
+	string type;
+	string topic;
 } bizuin; 
 
 typedef struct{
@@ -15,6 +17,8 @@ typedef struct{
 	string bizname;
 	string bizdesc;
 	float score;
+	string type;
+	string topic;
 } bizinfo; 
 
 typedef struct{

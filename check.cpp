@@ -2,7 +2,6 @@
 namespace wordexpand{
 	Check::Check(){
 		Init();
-		//uinsize = 0;
 		path = "";
 	}
 	Check::~Check(){}
@@ -24,10 +23,10 @@ namespace wordexpand{
 			fclose(fi);
 			string strrm = "rm -rf ./data/" + taskid + ".check";
 			system(strrm.c_str());
+			fclose(fi);
 		}else{
-			//commom::LOG_INFO(taskid + ":\t open file error");
 			mySql.UpdataTask(taskid,string("0"));
-		}
+		}		
 		return true;
 	}
 	bool Check::HdfsToLocal(string taskid){
@@ -70,26 +69,45 @@ namespace wordexpand{
 				f.WiteLine(str.c_str(), fo);
 			}
 		}
+
+		fi = fopen(PINGTAIPATH, "r");
+		if ((fi == NULL)||(fo == NULL)) {
+			commom::LOG_INFO("open file error");
+			return false;
+		}		
+		int score;
+		while ( f.ReadLine(buffer,MAX_LENTH,fi)!=NULL)	{
+			str = f.GetLine(buffer);
+			f.Split("\t",str,v);
+			if(v.size() != 2) continue;
+			str = v.at(0);
+			score = atof(v.at(1).c_str());
+			if(score*rand()%100 > 150 ){
+				str += "\t8\t0\n";
+				f.WiteLine(str.c_str(), fo);
+			}
+		}
+		fclose(fi);
+		fclose(fo);
+		//free(buffer);
 		return true;
 	}
-
 	bool comp(const std::pair<string, uininfo> & x, const std::pair<string, uininfo> & y){
 		return x.second.score > y.second.score;
 	}
 
-	//tag 0:biz 1:article 9:random
+	//tag 0:nogame;1:game 8:pingtai 9:random
 	bool Check::Process(string taskid,string uinnumber){
 		mySql.UpdataTask(taskid,string("5"));
 		//读取check,读出文件名
-		string checkfile = PATH +taskid + ".check";
-		FILE* fi = fopen(checkfile.c_str(), "r");
-		string filepath = PATH + taskid + ".temp";
-		FILE*fo = fopen(filepath.c_str(),"ab+");
+		FILE* fi = fopen(string(PATH +taskid + ".check").c_str(), "r");
+		//string filepath = ;
+		FILE*fo = fopen(string(PATH + taskid + ".temp").c_str(),"ab+");
 		if ((fi == NULL)||(fo == NULL)) {
 			commom::LOG_INFO(taskid + ":\topen file error");
 			mySql.UpdataTask(taskid,string("2"));
 			return false;
-		}	
+		}
 		std::string str = "";
 		std::vector<string> v;
 		char buffer[MAX_LENTH];	
@@ -101,8 +119,8 @@ namespace wordexpand{
 		}
 		fclose(fi);
 	    
-		for(int j =0; j< v.size(); j++){
-			//commom::LOG_INFO(v.at(j));
+		int line = 0;
+		for(int j =0; j< v.size(); j++){			
 			fi = fopen((PATH +v.at(j)).c_str(), "r");
 			if (fi == NULL) {
 				commom::LOG_INFO(taskid + ":\topen attemp file  error");
@@ -113,62 +131,32 @@ namespace wordexpand{
 				str = f.GetLine(buffer);
 				str += "\n";
 				f.WiteLine(str.c_str(), fo);
+				line++;
 			}
 			fclose(fi);
 		}
-		fclose(fo);		
-		
+		fclose(fo);	
+		//addpingtai addrandom
+		AddRandom(string(PATH + taskid + ".temp").c_str(), line/10);	
+
 		string fileout = PATH + taskid;
-		fi = fopen(filepath.c_str(), "r");
+		fi = fopen(string(PATH + taskid + ".temp").c_str(), "r");
 		fo = fopen(fileout.c_str(),"ab+");
 		if ((fi == NULL)||(fo == NULL)) {
 			commom::LOG_INFO(taskid + ":\topen file error");
 			mySql.UpdataTask(taskid,string("2"));
 			return false;
 		}		
-		uininfo tmp;
-		std::map<string,uininfo>dict;
-
 		while ( f.ReadLine(buffer,MAX_LENTH,fi)!=NULL)	{
 			str = f.GetLine(buffer);
 			f.Split("\t",str,v);
 			if(v.size() != 3)continue;
-			tmp.tag= v.at(1);
-			tmp.score = v.at(2);
-			dict[v.at(0)] = tmp;
+			str = v.at(0) + "\n";
+			f.WiteLine(str.c_str(), fo);
 		}
-		//取所有
-		if(uinnumber == ""){
-			for(std::map<string,uininfo>::iterator it = dict.begin(); it != dict.end(); it++){
-				//f.WiteLine((it->first + "\t" + it->second.tag + "\t" + it->second.score + "\n").c_str(), fo);
-				f.WiteLine((it->first + "\n").c_str(), fo);
-			}
-			fclose(fo);
-			AddRandom(fileout.c_str(), dict.size()/10);			
-		}else{
-			int number = atoi(uinnumber.c_str());
-			if(number >= dict.size()){
-				for(std::map<string,uininfo>::iterator it = dict.begin(); it != dict.end(); it++){
-					//f.WiteLine((it->first + "\t" + it->second.tag + "\t" + it->second.score + "\n").c_str(), fo);
-					f.WiteLine((it->first + "\n").c_str(), fo);
-				}
-				fclose(fo);
-				AddRandom(fileout.c_str(), dict.size()/10);		
-			}else{
-				//排序
-				std::vector<std::pair<string, uininfo> >tmpvec;
-				for(std::map<string,uininfo>::iterator it = dict.begin(); it != dict.end(); it++){
-					tmpvec.push_back(*it);
-				}
-				sort(tmpvec.begin(), tmpvec.end(),comp);
-				for(int j =0; j< number; j++){
-					//f.WiteLine((tmpvec.at(j).first + "\t" + tmpvec.at(j).second.tag + "\t" + tmpvec.at(j).second.score + "\n").c_str(), fo);
-					f.WiteLine((tmpvec.at(j).first + "\n").c_str(), fo);
-				}
-				fclose(fo);
-				AddRandom(fileout.c_str(), number/10);		
-			}
-		}
+		fclose(fi);
+		fclose(fo);
+		//free(buffer);
 		commom::LOG_INFO(taskid + ":\t process ok");
 		mySql.UpdataTask(taskid,string("3"));
 	}
@@ -198,15 +186,16 @@ namespace wordexpand{
 			mySql.UpdataTask(taskid,string("4"));
 		}else{
 			mySql.UpdataTask(taskid,string("3"));
-		}		
+		}	
+		fclose(fi);
 		return false;		
 	}
 
 	bool Check::CheckTask(){
+		std::vector<taskstaue> tasklist;
 		while(1){
-			//1:查询数据库状态
-			std::vector<taskstaue> tasklist;
-			mySql.SelectTask(tasklist);
+			//1:查询数据库状态			
+			mySql.SelectTask(tasklist);			
 			for(int i =0; i< tasklist.size(); ++i){
 				//2:根据状态处理相应的任务
 				if(tasklist.at(i).staue == "0"){
@@ -219,6 +208,7 @@ namespace wordexpand{
 					Send(tasklist.at(i).taskid);
 				}
 			}
+			std::vector<taskstaue>().swap(tasklist);
 			for(int i =0; i< 100000; i++){
 				for(int j =0; j< 100000; j++){
 					//

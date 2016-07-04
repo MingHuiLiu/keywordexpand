@@ -58,6 +58,7 @@ def get_article_click_uin(tdw):
     WriteLog("running=",sql)
     res = tdw.execute(sql)
     """
+
     #biz
     sql = '''INSERT table wxy_daily_game_uinlist
               SELECT
@@ -72,10 +73,11 @@ def get_article_click_uin(tdw):
                 wxg_data_valueless::wxy_monthly_raw_weixin_gamebiz_user_relations  b
              ON
                  a.id = b.fbiz_uin
-             where b.fdate_cd = "20160620"
+             where b.fdate_cd = "20160601"
           '''%taskid_
     WriteLog("running=",sql)
     res = tdw.execute(sql)
+
 
     #restable wxy_daily_game_uinres
     sql = '''INSERT OVERWRITE TABLE wxy_daily_game_uinres
@@ -91,7 +93,8 @@ def get_article_click_uin(tdw):
     WriteLog("running=",sql)
     res = tdw.execute(sql)
 
-    #filter
+    #filter old
+    """
     sql = '''INSERT TABLE wxy_daily_game_active_uin
               SELECT
                 a.taskid as taskid,
@@ -104,8 +107,25 @@ def get_article_click_uin(tdw):
              ON
                 a.uin = b.fuin
              where
-                a.taskid = '%s' and b.fdate_cd = '201605'
+                a.taskid = '%s' and b.fdate_cd = '201604'
           '''%(taskid_, taskid_)
+    WriteLog("running=",sql)
+    res = tdw.execute(sql)
+    """
+    sql = '''INSERT TABLE wxy_daily_game_active_uin
+              SELECT
+                a.taskid as taskid,
+ 	            a.uin as uin,
+ 	            b.fgame as tag,
+ 	            a.score + b.fgame as score
+             FROM
+                 wxy_daily_game_uinres a
+                join wxy_monthly_active_gameuser_uin_new b
+             ON
+                a.uin = b.fuin
+             where
+                a.taskid = '%s' and b.fdate_cd = '201604'
+          '''%taskid_
     WriteLog("running=",sql)
     res = tdw.execute(sql)
 

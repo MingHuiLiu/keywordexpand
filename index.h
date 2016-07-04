@@ -13,6 +13,7 @@ namespace wordexpand{
 	public://biz
 		commom::Func f;
 		seg::Wordseg mseg;
+		std::map<string,string>expanddict;
 		std::map<string, int>gamefilterdict;
 		//Sql mySql;
 

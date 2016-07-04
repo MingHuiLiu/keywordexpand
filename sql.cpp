@@ -119,6 +119,7 @@ namespace wordexpand{
 	}
 
 	bool Sql::SelectTask(std::vector<taskstaue>& tasklist){
+		//commom::DEBUG_INFO("check task");
 		int id = 0;
 		string sqlstr = "select * from lz_task_staue where staue != \"4\"";
 		ExeQuery(sqlstr);
@@ -138,6 +139,9 @@ namespace wordexpand{
 			tmp.staue = row[4];
 			tasklist.push_back(tmp);
 		}
+		//commom::DEBUG_INFO("free");
+		mysql_free_result(result);
+		//commom::DEBUG_INFO("return");
 		return true;
 	}
 

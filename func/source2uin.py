@@ -93,7 +93,8 @@ def get_article_click_uin(tdw):
     WriteLog("running=",sql)
     res = tdw.execute(sql)
 
-    #filter
+    #filter old
+    """
     sql = '''INSERT TABLE wxy_daily_game_active_uin
               SELECT
                 a.taskid as taskid,
@@ -108,6 +109,23 @@ def get_article_click_uin(tdw):
              where
                 a.taskid = '%s' and b.fdate_cd = '201604'
           '''%(taskid_, taskid_)
+    WriteLog("running=",sql)
+    res = tdw.execute(sql)
+    """
+    sql = '''INSERT TABLE wxy_daily_game_active_uin
+              SELECT
+                a.taskid as taskid,
+ 	            a.uin as uin,
+ 	            b.fgame as tag,
+ 	            a.score + b.fgame as score
+             FROM
+                 wxy_daily_game_uinres a
+                join wxy_monthly_active_gameuser_uin_new b
+             ON
+                a.uin = b.fuin
+             where
+                a.taskid = '%s' and b.fdate_cd = '201604'
+          '''%taskid_
     WriteLog("running=",sql)
     res = tdw.execute(sql)
 

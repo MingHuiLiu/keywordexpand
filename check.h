@@ -7,6 +7,7 @@
 #include "model.h"
 #define PATH "./data/"
 #define RANDOMPATH "./data/random"
+#define PINGTAIPATH "./data/random"
 #define UINTOTAL 20000000
 typedef struct{
 	string tag;

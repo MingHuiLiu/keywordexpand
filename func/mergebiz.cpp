@@ -3,74 +3,120 @@
 std::map<string,int> dict;
 seg::Wordseg mseg;
 commom::Func f;
-void loaddict(const char* file, const char* dictpath){
-	mseg.InitDict(dictpath);
-	FILE* fi = fopen(file,"r");
-	if(fi == NULL){
-		commom::DEBUG_INFO("open file error");
-		return;
-	}
-	char buffer[MAX_LENTH];		
-	std::string str = "";
-	std::vector<std::string> v ;
-	while ( f.ReadLine(buffer,MAX_LENTH,fi)!=NULL)	{
-		str = f.GetLine(buffer); 
-		f.Split("\t", str, v);
-		if(v.size() != 2)continue;
-		dict[v.at(0)] = atoi(v.at(1).c_str());
-	}
-	fclose(fi);
-}
-
-int score(string str, string word){
-	int s = 0;
-	std::map<string,int> v ;
-	f.Split(" ",str, v );
-	for(std::map<string,int>::iterator it = v.begin(); it != v.end(); it++){
-		if(it->first == word){
-			return 1;
-		}
-	}
-	return 0;
-}
-
 void maerge(const char* path, const char* pinttaipath, const char* otherpath){
-	FILE* fi = fopen(inpath,"r");
-	FILE* fo = fopen(outpath,"ab+");
-	if((fi == NULL)||(fo == NULL)){
-		commom::DEBUG_INFO("open file error");
-		return;
-	}
 	commom::Func f;
 	char buffer[MAX_LENTH];		
 	std::string str = "";
 	std::vector<std::string> v ;
+	std::map<string,string>dict;
+	string paout = path;
+	paout +=  "gamebizall";
+	FILE* fo = fopen(paout.c_str(),"ab+");
+	for(int i =1; i< 25; i++){
+		string pa = path + f.ConvertToStr(i) + ".txt";
+		FILE* fi = fopen(pa.c_str(),"r");
+		if((fi == NULL)||(fo == NULL)){
+			commom::DEBUG_INFO("open file error");
+			continue;;
+		}
+		int line = 0;
+		string wordstr = "";
+		while ( f.ReadLine(buffer,MAX_LENTH,fi)!=NULL)	{
+			str = f.GetLine(buffer); 
+			if(line++ == 0){
+				wordstr = str;
+				continue;
+			}
+			f.Split("\t", str, v);
+			if(v.size() != 4){
+				continue;
+			}
+			if(v.at(0).size() != 10){
+				commom::DEBUG_INFO(f.ConvertToStr(i) + "uin error");
+			}
+
+			if(dict.find(str) == dict.end()){
+				dict[str] = wordstr;
+			}else{
+				dict[str]  +=("," + wordstr);
+			}
+		}
+		fclose(fi);
+	}
+	for(std::map<string,string>::iterator it = dict.begin(); it != dict.end(); it++){
+		string tmp = it->first + "\t" + it->second + "\n";
+		f.WiteLine(tmp.c_str(), fo);
+	}
+	FILE* fi = fopen(pinttaipath,"r");
+	while ( f.ReadLine(buffer,MAX_LENTH,fi)!=NULL)	{
+		str = f.GetLine(buffer) + "\t\n";
+		f.WiteLine(str.c_str(), fo);
+	}
+	fclose(fi);
+	fi = fopen(otherpath,"r");
+	while ( f.ReadLine(buffer,MAX_LENTH,fi)!=NULL)	{
+		str = f.GetLine(buffer) + "\t\n";
+		f.WiteLine(str.c_str(), fo);
+	}
+	fclose(fi);
+	fclose(fo);
+}
+
+
+void sortbizuin(const char* path, const char* pinttaipath){
+	commom::Func f;
+	char buffer[MAX_LENTH];		
+	std::string str = "";
+	std::vector<std::string> v ;
+	//std::map<string,string>dict;
+	FILE* fo = fopen(pinttaipath,"ab+");
+	FILE* fi = fopen(path,"r");
+	if((fi == NULL)||(fo == NULL)){
+		commom::DEBUG_INFO("open file error");
+		return;;
+	}
+	std::vector<std::pair<string, float> > dict; 
 	while ( f.ReadLine(buffer,MAX_LENTH,fi)!=NULL)	{
 		str = f.GetLine(buffer); 
 		f.Split("\t", str, v);
 		if(v.size() != 4){
 			continue;
 		}
-		string s = v.at(1) + " " + v.at(2);
-		string segstr = mseg.Segement(s.c_str());
-		bool flag = false;
-		for(std::map<string,int>::iterator it = dict.begin(); it != dict.end(); it++){
-			if(score(segstr,it->first) == 1){
-				f.WiteLine(string(it->first + "\t" + str + "\n").c_str(), fo);
-				flag = true;
-			}
+		if(atof(v.at(3).c_str()) <4){
+			continue;
+		}else{
+			dict.push_back(std::pair<string, float>(v.at(1), atof(v.at(3).c_str())));
 		}
-		if(flag == false){
-			f.WiteLine(string( "\t" + str + "\n").c_str(), fo);
+	}
+	fclose(fi);
+	sort(dict.begin(), dict.end(), f.SortBySecondGreater);
+	commom::DEBUG_INFO(f.ConvertToStr(dict.size()));
+	for(int j =0; j< dict.size(); j++){
+		str = dict.at(j).first + "\t" + f.ConvertToStr(dict.at(j).second) + "\n";
+		f.WiteLine(str.c_str(), fo);
+	}
+	fi = fopen(path,"r");
+	if((fi == NULL)||(fo == NULL)){
+		commom::DEBUG_INFO("open file error");
+		return;;
+	}
+	while ( f.ReadLine(buffer,MAX_LENTH,fi)!=NULL)	{
+		str = f.GetLine(buffer); 
+		f.Split("\t", str, v);
+		if(v.size() != 4){
+			continue;
+		}
+		if(atof(v.at(3).c_str()) <4){
+			str = v.at(1) + "\t" + v.at(3) + "\n";
+			f.WiteLine(str.c_str(), fo);
 		}
 	}
 	fclose(fi);
 	fclose(fo);
 
 }
-
 int main(int argc, char *argv[]) {
-	loaddict(argv[1],argv[2]);
-	classfy(argv[3],argv[4]);
+	//maerge(argv[1],argv[2],argv[3]);
+	sortbizuin(argv[1],argv[2]);
 	return 0;
 }

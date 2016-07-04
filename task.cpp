@@ -174,7 +174,7 @@ namespace wordexpand{
 		}
 		int i = 0;
 		for(std::vector<bizinfo>::iterator it =  bizresults.begin(); it != bizresults.end(); it++){
-			if(i++ > 200){
+			if(i++ > 500){
 				break;
 			}
 			str = taskid + string("\t") + (*it).uin + string("\t0\t1\t") +f.ConvertToStr((*it).score) + "\n";
@@ -216,6 +216,7 @@ namespace wordexpand{
 			commom::LOG_INFO(taskid + ":\tuinToFile error");
 			return false;
 		}
+		//return false;
 		return CallLz();
 	}
 
