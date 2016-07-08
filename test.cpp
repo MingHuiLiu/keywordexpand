@@ -1,7 +1,6 @@
 #include "index.h"
 #include "sever.h"
 #include "lz.h"
-#include "bitmap.h"
 #include "task.h"
 int main(int argc, char *argv[]) {
 	/*

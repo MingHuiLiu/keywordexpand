@@ -8,7 +8,6 @@ namespace wordexpand{
 		Model(){}
 		~Model(){}
 	public:
-		commom::Func f;
 	public:
 		//void CallBack(struct evhttp_request *req, void *arg);
 	};

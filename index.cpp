@@ -19,9 +19,9 @@ namespace wordexpand{
 		std::string str = "";
 		std::vector<string>v;
 		char buffer[MAX_LENTH];	
-		while ( f.ReadLine(buffer,MAX_LENTH,fi)!=NULL)	{
-			str = f.GetLine(buffer); 
-			f.Split(" ", str, gamefilterdict);
+		while ( commom::ReadLine(buffer,MAX_LENTH,fi)!=NULL)	{
+			str = commom::GetLine(buffer); 
+			commom::Split(" ", str, gamefilterdict);
 		}
 		fclose(fi);
 		fi = fopen((string(dictpath) + "expand.dict").c_str(),"r");
@@ -29,9 +29,9 @@ namespace wordexpand{
 			commom::LOG_INFO("open file error");
 			return false;
 		}
-		while ( f.ReadLine(buffer,MAX_LENTH,fi)!=NULL)	{
-			str = f.GetLine(buffer); 
-			f.Split("\t", str, v);
+		while ( commom::ReadLine(buffer,MAX_LENTH,fi)!=NULL)	{
+			str = commom::GetLine(buffer); 
+			commom::Split("\t", str, v);
 			if(v.size() == 2){
 				expanddict[v.at(0)] = v.at(1);
 			}
@@ -57,9 +57,9 @@ namespace wordexpand{
 		std::vector<std::string> v ;
 		bizuin biz;
 		int linenum = 0;
-		while ( f.ReadLine(buffer,MAX_LENTH,fi)!=NULL)	{
-			str = f.GetLine(buffer); 
-			f.Split("\t", str, v);
+		while ( commom::ReadLine(buffer,MAX_LENTH,fi)!=NULL)	{
+			str = commom::GetLine(buffer); 
+			commom::Split("\t", str, v);
 			if(v.size() != 5){
 				commom::DEBUG_INFO("continue");
 				continue;
@@ -87,7 +87,7 @@ namespace wordexpand{
 			doc.add_value(3,biz.type);
 			db.add_document(doc);	
 			if((++linenum)% 10000 == 0){
-				commom::DEBUG_INFO(string(filein) + "\t" + f.ConvertToStr(linenum));
+				commom::DEBUG_INFO(string(filein) + "\t" + commom::ConvertToStr(linenum));
 				db.flush();
 			}			
 		}
@@ -109,9 +109,9 @@ namespace wordexpand{
 		std::vector<std::string> v ;
 		articleuin biz;
 		int linenum = 0;
-		while ( f.ReadLine(buffer,MAX_LENTH,fi)!=NULL)	{
-			str = f.GetLine(buffer); 
-			f.Split("\t", str, v);
+		while ( commom::ReadLine(buffer,MAX_LENTH,fi)!=NULL)	{
+			str = commom::GetLine(buffer); 
+			commom::Split("\t", str, v);
 			if(v.size() != 5)continue;
 			biz.bizuin = v.at(0);
 			biz.appmsgid = v.at(1);
@@ -121,7 +121,7 @@ namespace wordexpand{
 			Xapian::Document doc;			
 			doc.set_data(biz.bizuin + "_" + biz.appmsgid + "_" + biz.itemidx);	
 			indexer.set_document(doc);
-			f.Split(" ", mseg.QuickSegement(biz.title.c_str()), v);
+			commom::Split(" ", mseg.QuickSegement(biz.title.c_str()), v);
 			str = "";
 			for(int i = 0; i< v.size(); i++){
 				if(v.at(i).size() >= 4){
@@ -148,7 +148,7 @@ namespace wordexpand{
 		std::vector<std::string> v ;
 		//step1: query 检查,检查query结构， 参数是否完整		
 		//step2: query 解析
-		f.Split("_", query, v);
+		commom::Split("_", query, v);
 		//step3: query 查询
 		//更新任务表
 		mySql.AddTask(taskinfo);
@@ -218,13 +218,13 @@ namespace wordexpand{
 		sort(results.begin(), results.end(),Bizrank);		
 		int x =  results.size() < 100 ? results.size() : 100 ;
 		for(int i =0; i< x; i++){
-			commom::DEBUG_INFO(results.at(i).bizname + "\t" + results.at(i).bizdesc + "\t" + f.ConvertToStr(results.at(i).score));	
+			commom::DEBUG_INFO(results.at(i).bizname + "\t" + results.at(i).bizdesc + "\t" + commom::ConvertToStr(results.at(i).score));	
 		}
 		for(int i = 0; i< 3; i++){
 			str = results.at(i).type;
 			commom::DEBUG_INFO(str);
-			f.Split(",", str, v);
-			commom::DEBUG_INFO(f.ConvertToStr(v.size()));
+			commom::Split(",", str, v);
+			commom::DEBUG_INFO(commom::ConvertToStr(v.size()));
 			for(int j =0 ;j< v.size(); j++){
 				if(v.at(j) != ""){
 					dict[v.at(j)] += pow(results.at(i).score,3);
@@ -235,7 +235,7 @@ namespace wordexpand{
 		str = "";
 		float num = 0;
 		for(std::map<string,float>::iterator it =dict.begin(); it != dict.end(); it++){
-			commom::DEBUG_INFO(f.ConvertToStr(it->second));
+			commom::DEBUG_INFO(commom::ConvertToStr(it->second));
 			if(it->second > num){
 				num = it->second;
 				str = it->first;
@@ -256,9 +256,9 @@ namespace wordexpand{
 		articleuin biz;
 		int linenum = 0;
 		commom::DEBUG_INFO("********************expand***************************");
-		while ( f.ReadLine(buffer,MAX_LENTH,fi)!=NULL)	{
-			str = f.GetLine(buffer); 
-			f.Split("\t", str, v);
+		while ( commom::ReadLine(buffer,MAX_LENTH,fi)!=NULL)	{
+			str = commom::GetLine(buffer); 
+			commom::Split("\t", str, v);
 			if(v.size() != 4)continue;
 			tmp.uin = v.at(0);
 			tmp.score = 0;
@@ -284,7 +284,7 @@ namespace wordexpand{
 	
 		int x =  results.size() < 100 ? results.size() : 100 ;
 		for(int i =0; i< x; i++){
-			commom::DEBUG_INFO(results.at(i).title + "\t" + f.ConvertToStr(results.at(i).score));
+			commom::DEBUG_INFO(results.at(i).title + "\t" + commom::ConvertToStr(results.at(i).score));
 		}
 	
 		return true;
@@ -292,7 +292,7 @@ namespace wordexpand{
 	//filter
 	bool Index::FilerGame(string str){
 		std::vector<std::string> v ;
-		f.Split(" ",mseg.QuickSegement(str.c_str()),v);
+		commom::Split(" ",mseg.QuickSegement(str.c_str()),v);
 		for(std::vector<string>::iterator it = v.begin(); it != v.end(); it++){
 			if(gamefilterdict.find(*it) != gamefilterdict.end()){
 				return true;
@@ -308,7 +308,7 @@ namespace wordexpand{
 		for(int i = 0; i < querylist.size(); i++){	
 			
 			
-			f.Split(" ",mseg.Segement(querylist.at(i).c_str()), v);
+			commom::Split(" ",mseg.Segement(querylist.at(i).c_str()), v);
 			if(v.size() == 0) return "";
 			if(v.size() == 1){
 				query += "";
@@ -346,7 +346,7 @@ namespace wordexpand{
 		//seg
 		std::vector<string> v;
 		for(int i = 0; i < querylist.size(); i++){	
-			f.Split(" ",mseg.Segement(querylist.at(i).c_str()), v);
+			commom::Split(" ",mseg.Segement(querylist.at(i).c_str()), v);
 			if(v.size() == 0) return "";
 			if(v.size() == 1){
 				query += querylist.at(i);
@@ -389,13 +389,13 @@ namespace wordexpand{
 
 	bool Index::ArticleRetrieval(std::vector<string>& querylist,std::vector<articleinfo>& results){
 		Xapian::Database db;
-		std::map<string,int> dblist;
-		f.GetDirfile(dblist,"../../data/database/gamearticleindex/");
-		for(std::map<string,int>::iterator it = dblist.begin(); it != dblist.end(); it++){
-			if((it->first.size() != 8)||(it->first > "20160610")||(it->first < "20160500")){
+		std::vector<string> dblist;
+		commom::GetDirfile(dblist,"../../data/database/gamearticleindex/");
+		for(std::vector<string>::iterator it = dblist.begin(); it != dblist.end(); it++){
+			if((it->size() != 8)||(*it > "20160610")||(*it < "20160500")){
 				continue;
 			}
-			string dbpath = "../../data/database/gamearticleindex/" + it->first + string("/");
+			string dbpath = "../../data/database/gamearticleindex/" + *it + string("/");
 			commom::DEBUG_INFO(dbpath);
 			db.add_database(Xapian::Database(dbpath.c_str()));
 		}
@@ -414,7 +414,7 @@ namespace wordexpand{
 			enquire.set_query(query);
 			//enquire.set_sort_by_relevance_then_value(2);
 			Xapian::MSet matches = enquire.get_mset(0, 1000000);
-			commom::DEBUG_INFO(f.ConvertToStr(matches.size()));
+			commom::DEBUG_INFO(commom::ConvertToStr(matches.size()));
 			ArticleRank(matches,results);
 			return true;
 	}

@@ -53,7 +53,7 @@ namespace wordexpand{
 	}
 
 	void CallBack(struct evhttp_request *req, void *arg){
-		commom::Func f;
+		//////commom::Func f;	;	;	
 		commom::DEBUG_INFO("lisenling");
 		struct evkeyvalq http_query_post;
 		int buffer_data_len = EVBUFFER_LENGTH(req->input_buffer);
@@ -85,7 +85,7 @@ namespace wordexpand{
 		restr += "\"" + mTask.taskid +"\"";
 		restr += "}";
 		
-		commom::LOG_INFO(f.GetTime() + "\t:" + restr);		
+		commom::LOG_INFO(commom::GetTime() + "\t:" + restr);		
 		struct evbuffer *buf = evbuffer_new();
 		if(!buf){  
 			puts("failed to create response buffer");  

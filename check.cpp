@@ -2,7 +2,7 @@
 namespace wordexpand{
 	Check::Check(){
 		Init();
-		path = "";
+		path = "10.234.151.147::mmocgameuin//from_data_apply/";
 	}
 	Check::~Check(){}
 	bool Check::Init(){
@@ -23,13 +23,14 @@ namespace wordexpand{
 			fclose(fi);
 			string strrm = "rm -rf ./data/" + taskid + ".check";
 			system(strrm.c_str());
-			fclose(fi);
 		}else{
+			delete fi;
 			mySql.UpdataTask(taskid,string("0"));
 		}		
 		return true;
 	}
 	bool Check::HdfsToLocal(string taskid){
+		
 		mySql.UpdataTask(taskid,string("5"));
 		string hadooppath = "/usr/local/hadoop-0.20.1-tdw.0.2/bin/hadoop";
 		string hadooppasswd = "-Dfs.default.name=hdfs://tl-if-nn-tdw.tencent-distribute.com:54310 -Dhadoop.job.ugi=tdw_seanxywang:tdw_seanxywang,g_cdg_weixin";
@@ -59,14 +60,14 @@ namespace wordexpand{
 		std::string str = "";
 		std::vector<string>v;
 		char buffer[MAX_LENTH];	
-		while ( f.ReadLine(buffer,MAX_LENTH,fi)!=NULL)	{
-			str = f.GetLine(buffer);
-			f.Split("\t",str,v);
+		while ( commom::ReadLine(buffer,MAX_LENTH,fi)!=NULL)	{
+			str = commom::GetLine(buffer);
+			commom::Split("\t",str,v);
 			if(v.size() != 2) continue;
 			str = v.at(0);
 			if(rand()%UINTOTAL < num){
 				str += "\t9\t0\n";
-				f.WiteLine(str.c_str(), fo);
+				commom::WiteLine(str.c_str(), fo);
 			}
 		}
 
@@ -76,15 +77,15 @@ namespace wordexpand{
 			return false;
 		}		
 		int score;
-		while ( f.ReadLine(buffer,MAX_LENTH,fi)!=NULL)	{
-			str = f.GetLine(buffer);
-			f.Split("\t",str,v);
+		while ( commom::ReadLine(buffer,MAX_LENTH,fi)!=NULL)	{
+			str = commom::GetLine(buffer);
+			commom::Split("\t",str,v);
 			if(v.size() != 2) continue;
 			str = v.at(0);
 			score = atof(v.at(1).c_str());
 			if(score*rand()%100 > 150 ){
 				str += "\t8\t0\n";
-				f.WiteLine(str.c_str(), fo);
+				commom::WiteLine(str.c_str(), fo);
 			}
 		}
 		fclose(fi);
@@ -111,8 +112,8 @@ namespace wordexpand{
 		std::string str = "";
 		std::vector<string> v;
 		char buffer[MAX_LENTH];	
-		while ( f.ReadLine(buffer,MAX_LENTH,fi)!=NULL)	{			
-			str = f.GetLine(buffer);
+		while ( commom::ReadLine(buffer,MAX_LENTH,fi)!=NULL)	{			
+			str = commom::GetLine(buffer);
 			if(str.size() > 10){
 				v.push_back(str);
 			}
@@ -127,10 +128,10 @@ namespace wordexpand{
 				mySql.UpdataTask(taskid,string("2"));
 				return false;
 			}	
-			while ( f.ReadLine(buffer,MAX_LENTH,fi)!=NULL)	{
-				str = f.GetLine(buffer);
+			while ( commom::ReadLine(buffer,MAX_LENTH,fi)!=NULL)	{
+				str = commom::GetLine(buffer);
 				str += "\n";
-				f.WiteLine(str.c_str(), fo);
+				commom::WiteLine(str.c_str(), fo);
 				line++;
 			}
 			fclose(fi);
@@ -147,12 +148,12 @@ namespace wordexpand{
 			mySql.UpdataTask(taskid,string("2"));
 			return false;
 		}		
-		while ( f.ReadLine(buffer,MAX_LENTH,fi)!=NULL)	{
-			str = f.GetLine(buffer);
-			f.Split("\t",str,v);
+		while ( commom::ReadLine(buffer,MAX_LENTH,fi)!=NULL)	{
+			str = commom::GetLine(buffer);
+			commom::Split("\t",str,v);
 			if(v.size() != 3)continue;
 			str = v.at(0) + "\n";
-			f.WiteLine(str.c_str(), fo);
+			commom::WiteLine(str.c_str(), fo);
 		}
 		fclose(fi);
 		fclose(fo);
@@ -166,7 +167,6 @@ namespace wordexpand{
 		strscp += (PATH + taskid);
 		strscp += " qspace@10.234.151.147::mmocgameuin/from_data_apply";//10.234.133.11
 		system(strscp.c_str());
-		path = "10.234.151.147::mmocgameuin//from_data_apply/";
 		path += taskid;
 
 		string fileout = PATH + taskid;
@@ -178,10 +178,10 @@ namespace wordexpand{
 		}		
 		int linenumber = 0;
 		char buffer[MAX_LENTH];	
-		while ( f.ReadLine(buffer,MAX_LENTH,fi)!=NULL)	{
+		while ( commom::ReadLine(buffer,MAX_LENTH,fi)!=NULL)	{
 			linenumber++ ;
 		}
-		if(myLz.SendUinStaue(taskid,f.ConvertToStr(linenumber),path)){
+		if(myLz.SendUinStaue(taskid,commom::ConvertToStr(linenumber),path)){
 			commom::LOG_INFO("send");
 			mySql.UpdataTask(taskid,string("4"));
 		}else{
@@ -191,6 +191,7 @@ namespace wordexpand{
 		return false;		
 	}
 
+	/*
 	bool Check::CheckTask(){
 		std::vector<taskstaue> tasklist;
 		while(1){
@@ -203,17 +204,49 @@ namespace wordexpand{
 				}else if(tasklist.at(i).staue == "1"){
 					HdfsToLocal(tasklist.at(i).taskid);
 				}else if(tasklist.at(i).staue == "2"){
-					Process(tasklist.at(i).taskid, tasklist.at(i).num);
+					//Process(tasklist.at(i).taskid, tasklist.at(i).num);
 				}else if(tasklist.at(i).staue == "3"){
-					Send(tasklist.at(i).taskid);
+					//Send(tasklist.at(i).taskid);
 				}
 			}
 			std::vector<taskstaue>().swap(tasklist);
+			//Sleep(10);
 			for(int i =0; i< 100000; i++){
 				for(int j =0; j< 100000; j++){
 					//
 				}
 			}
+
+		}
+	}
+	*/
+	bool CheckTask(){
+		int i,j = 0;
+		//
+		std::vector<taskstaue> tasklist;
+		Check checker;
+		while(1){			
+			checker.mySql.SelectTask(tasklist);			
+			for(i =0; i< tasklist.size(); ++i){
+				//commom::DEBUG_INFO("check");
+				//2:根据状态处理相应的任务
+				if(tasklist.at(i).staue == "0"){
+					checker.CheckLz(tasklist.at(i).taskid);
+				}else if(tasklist.at(i).staue == "1"){
+					checker.HdfsToLocal(tasklist.at(i).taskid);
+				}else if(tasklist.at(i).staue == "2"){
+					checker.Process(tasklist.at(i).taskid, tasklist.at(i).num);
+				}else if(tasklist.at(i).staue == "3"){
+					checker.Send(tasklist.at(i).taskid);
+				}
+			}			
+			tasklist.clear();
+			std::vector<taskstaue>().swap(tasklist);
+			//Sleep(10);
+			for(i =0; i< 100000; i++){
+				for(j =0; j< 10000; j++){}
+			}
+			//checker.~Check();
 
 		}
 	}

@@ -2,7 +2,7 @@
 #include "../wordseg/seg.h"
 std::map<string,int> dict;
 seg::Wordseg mseg;
-commom::Func f;
+//////commom::Func f;	;	;	
 void loaddict(const char* file, const char* dictpath){
 	mseg.InitDict(dictpath);
 	FILE* fi = fopen(file,"r");
@@ -13,9 +13,9 @@ void loaddict(const char* file, const char* dictpath){
 	char buffer[MAX_LENTH];		
 	std::string str = "";
 	std::vector<std::string> v ;
-	while ( f.ReadLine(buffer,MAX_LENTH,fi)!=NULL)	{
-		str = f.GetLine(buffer); 
-		f.Split("\t", str, v);
+	while ( commom::ReadLine(buffer,MAX_LENTH,fi)!=NULL)	{
+		str = commom::GetLine(buffer); 
+		commom::Split("\t", str, v);
 		if(v.size() != 2)continue;
 		dict[v.at(0)] = atoi(v.at(1).c_str());
 	}
@@ -25,7 +25,7 @@ void loaddict(const char* file, const char* dictpath){
 int score(string str, string word){
 	int s = 0;
 	std::map<string,int> v ;
-	f.Split(" ",str, v );
+	commom::Split(" ",str, v );
 	for(std::map<string,int>::iterator it = v.begin(); it != v.end(); it++){
 		if(it->first == word){
 			return 1;
@@ -41,13 +41,13 @@ void classfy(const char* inpath, const char* outpath){
 		commom::DEBUG_INFO("open file error");
 		return;
 	}
-	commom::Func f;
+	//////commom::Func f;	;	;	
 	char buffer[MAX_LENTH];		
 	std::string str = "";
 	std::vector<std::string> v ;
-	while ( f.ReadLine(buffer,MAX_LENTH,fi)!=NULL)	{
-		str = f.GetLine(buffer); 
-		f.Split("\t", str, v);
+	while ( commom::ReadLine(buffer,MAX_LENTH,fi)!=NULL)	{
+		str = commom::GetLine(buffer); 
+		commom::Split("\t", str, v);
 		if(v.size() != 4){
 			continue;
 		}
@@ -56,12 +56,12 @@ void classfy(const char* inpath, const char* outpath){
 		bool flag = false;
 		for(std::map<string,int>::iterator it = dict.begin(); it != dict.end(); it++){
 			if(score(segstr,it->first) == 1){
-				f.WiteLine(string(it->first + "\t" + str + "\n").c_str(), fo);
+				commom::WiteLine(string(it->first + "\t" + str + "\n").c_str(), fo);
 				flag = true;
 			}
 		}
 		if(flag == false){
-			f.WiteLine(string( "\t" + str + "\n").c_str(), fo);
+			commom::WiteLine(string( "\t" + str + "\n").c_str(), fo);
 		}
 	}
 	fclose(fi);

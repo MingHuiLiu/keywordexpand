@@ -23,14 +23,14 @@ namespace wordexpand{
 		std::vector<string> v;
 		std::vector<string> tmp;
 		std::map<string,string>dict;
-		f.Split("&", confstr, v);
+		commom::Split("&", confstr, v);
 		if(v.size() != 4){
 			desc = "param number error!";
 			return false;
 		}else{
 			for(int j =0; j < v.size(); j++){
 				string ss = v.at(j);
-				f.Split("=",ss,tmp);
+				commom::Split("=",ss,tmp);
 				if(tmp.size() != 2){
 					desc = "param wrong!";
 					return false;
@@ -50,7 +50,7 @@ namespace wordexpand{
 			desc = "keywd error!";
 			return false;
 		}
-		f.Split("_",keywd,tmp);
+		commom::Split("_",keywd,tmp);
 		if(tmp.size() < 1){
 			desc = "keywd error!";
 			return false;
@@ -61,7 +61,7 @@ namespace wordexpand{
 			return false;
 		}
 		int sourceint = atoi(dict["source"].c_str());
-		commom::DEBUG_INFO(f.ConvertToStr(sourceint));
+		commom::DEBUG_INFO(commom::ConvertToStr(sourceint));
 		if(sourceint == 0){
 			return false;
 		}else if(sourceint == 1){
@@ -92,7 +92,7 @@ namespace wordexpand{
 			desc = "uinnumber error!";
 			return false;
 		}
-		taskid = f.GetDate() +  f.ConvertToStr(mySql.GetTaskId());
+		taskid = commom::GetDate() +  commom::ConvertToStr(mySql.GetTaskId());
 		commom::DEBUG_INFO("taskid : " + taskid);
 		inputconf.id = taskid;
 		inputconf.keywds = keywd;
@@ -108,7 +108,7 @@ namespace wordexpand{
 		//解析传入参数
 		commom::DEBUG_INFO("Config");
 		string conf = "";
-		conf += ("task_id:" + f.ConvertToStr(mySql.GetTaskId()));
+		conf += ("task_id:" + commom::ConvertToStr(mySql.GetTaskId()));
 		conf += ";";
 		conf += ("task_version:1");
 		conf += ";";
@@ -134,22 +134,22 @@ namespace wordexpand{
 		conf += ";";
 		conf += ("modify_user:\"seanxywang\"");
 		conf += ";";
-		//f.GetDate()
-		conf += ("create_time:\"" + f.GetTime());
+		//commom::GetDate()
+		conf += ("create_time:\"" + commom::GetTime());
 		conf += "\";";	
-		conf += ("modify_time:\"" + f.GetTime());
+		conf += ("modify_time:\"" + commom::GetTime());
 		conf += "\";";	
 		std::vector<std::string> res ;
 		std::vector<std::string> tmp ;
 		//commom::DEBUG_INFO(conf);
-		f.Split(";", conf, res);
+		commom::Split(";", conf, res);
 		for(int i = 0; i < res.size(); i++){
-			f.Split(":",res.at(i),tmp);
+			commom::Split(":",res.at(i),tmp);
 			if(tmp.size() == 2){
 				taskinfo[tmp.at(0)] = tmp.at(1);
 			}
 		}
-		//commom::DEBUG_INFO(f.ConvertToStr(taskinfo.size()));
+		//commom::DEBUG_INFO(commom::ConvertToStr(taskinfo.size()));
 		return true;
 	}
 
@@ -177,16 +177,16 @@ namespace wordexpand{
 			if(i++ > 500){
 				break;
 			}
-			str = taskid + string("\t") + (*it).uin + string("\t0\t1\t") +f.ConvertToStr((*it).score) + "\n";
-			f.WiteLine(str.c_str(),fo);
+			str = taskid + string("\t") + (*it).uin + string("\t0\t1\t") +commom::ConvertToStr((*it).score) + "\n";
+			commom::WiteLine(str.c_str(),fo);
 		}	
 		i = 0;
 		for(std::vector<articleinfo>::iterator it = articleresults.begin(); it != articleresults.end(); it++){
 			if(i++ > 10000){
 				break;
 			}
-			str = taskid + string("\t") + (*it).articleuin + string("\t1\t1\t") +f.ConvertToStr((*it).score) + "\n";
-			f.WiteLine(str.c_str(),fo);
+			str = taskid + string("\t") + (*it).articleuin + string("\t1\t1\t") +commom::ConvertToStr((*it).score) + "\n";
+			commom::WiteLine(str.c_str(),fo);
 		}	
 		fclose(fo);
 		return true;

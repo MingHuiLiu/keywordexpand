@@ -11,7 +11,7 @@ namespace wordexpand{
 		Index(){}
 		~Index(){}
 	public://biz
-		commom::Func f;
+		////commom::Func f;	;	;
 		seg::Wordseg mseg;
 		std::map<string,string>expanddict;
 		std::map<string, int>gamefilterdict;

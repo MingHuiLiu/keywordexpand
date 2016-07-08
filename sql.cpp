@@ -6,7 +6,7 @@ namespace wordexpand{
 			commom::LOG_INFO("connect mysql error");
 			return false;
 		}
-		commom::DEBUG_INFO("init mysql ok");
+		//commom::DEBUG_INFO("init mysql ok");
 		return true;
 	}
 
@@ -75,7 +75,7 @@ namespace wordexpand{
 			strsql += (", type= 0");
 			strsql += (", source_word=\"\"");
 			strsql += (", source = \"\"");
-			strsql += (", score= " + f.ConvertToStr(results.at(i).score));
+			strsql += (", score= " + commom::ConvertToStr(results.at(i).score));
 			strsql += (", iteration = 1");
 			strsql += (", delete_status = 0");
 			strsql += (", modify_user= " + taskinfo["modify_user"]);
@@ -110,7 +110,7 @@ namespace wordexpand{
 		string strsql = "";
 		strsql += "insert into lz_task_staue set ";
 		strsql += ("taskid= " + taskid);
-		strsql += (", ds= " + f.GetTime());
+		strsql += (", ds= " + commom::GetTime());
 		strsql += (", lzid= " + lzid);
 		strsql += (", uinnumber= \"" + uinnumber + "\"");
 		strsql += (", staue= \"0\"");

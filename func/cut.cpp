@@ -1,6 +1,6 @@
 #include "../commom/func.h"
 void cut(const char* filein, const char* dbpath){
-	commom::Func f;
+	//////commom::Func f;	;	;	
 	FILE*fi = fopen(filein,"r");
 	if (fi == NULL) {
 		commom::LOG_INFO("open file error" + string(filein));
@@ -21,32 +21,32 @@ void cut(const char* filein, const char* dbpath){
 	std::string str = "";
 	std::vector<std::string> v ;
 	int linenum = 0;
-	while ( f.ReadLine(buffer,MAX_LENTH,fi)!=NULL)	{
-		str = f.GetLine(buffer); 
-		f.Split("\t", str, v);
+	while ( commom::ReadLine(buffer,MAX_LENTH,fi)!=NULL)	{
+		str = commom::GetLine(buffer); 
+		commom::Split("\t", str, v);
 		if(v.size() != 5)continue;
 		int fre = atoi(v.at(3).c_str());
 		str += "\n";
 		if(fre > 5000){
-			f.WiteLine(str.c_str(),foa);
+			commom::WiteLine(str.c_str(),foa);
 		}else if(fre > 1500){
-			f.WiteLine(str.c_str(),fob);
+			commom::WiteLine(str.c_str(),fob);
 		}else if(fre > 800){
-			f.WiteLine(str.c_str(),foc);
+			commom::WiteLine(str.c_str(),foc);
 		}else if(fre > 600){
-			f.WiteLine(str.c_str(),fod);
+			commom::WiteLine(str.c_str(),fod);
 		}else if(fre > 500){
-			f.WiteLine(str.c_str(),foe);
+			commom::WiteLine(str.c_str(),foe);
 		}else if(fre > 400){
-			f.WiteLine(str.c_str(),fof);
+			commom::WiteLine(str.c_str(),fof);
 		}else if(fre > 300){
-			f.WiteLine(str.c_str(),fog);
+			commom::WiteLine(str.c_str(),fog);
 		}else if(fre > 200){
-			f.WiteLine(str.c_str(),foh);
+			commom::WiteLine(str.c_str(),foh);
 		}else if(fre > 150){
-			f.WiteLine(str.c_str(),foi);
+			commom::WiteLine(str.c_str(),foi);
 		}else{
-			f.WiteLine(str.c_str(),foj);
+			commom::WiteLine(str.c_str(),foj);
 		}
 	}
 	fclose(foa);
@@ -62,7 +62,7 @@ void cut(const char* filein, const char* dbpath){
 }
 
 void cut_file(const char* filein, const char* dbpath){
-	commom::Func f;
+	//////commom::Func f;	;	;	
 	typedef FILE* _FILE;
 	
 	FILE*fi = fopen(filein,"r");
@@ -106,9 +106,9 @@ void cut_file(const char* filein, const char* dbpath){
 	std::string str = "";
 	std::vector<std::string> v ;
 	int linenum = 0;
-	while ( f.ReadLine(buffer,MAX_LENTH,fi)!=NULL)	{
-		str = f.GetLine(buffer); 
-		f.Split("\t", str, v);
+	while ( commom::ReadLine(buffer,MAX_LENTH,fi)!=NULL)	{
+		str = commom::GetLine(buffer); 
+		commom::Split("\t", str, v);
 		if(v.size() != 5)continue;
 		int fre = atoi(v.at(4).c_str()) - 20160501;
 		if((fre < 0 )||(fre > 29)){
@@ -116,7 +116,7 @@ void cut_file(const char* filein, const char* dbpath){
 			continue;
 		}
 		str += "\n";
-		f.WiteLine(str.c_str(),fo[fre]);
+		commom::WiteLine(str.c_str(),fo[fre]);
 	}
 	for(int i =0; i < 30; i++){
 		fclose(fo[i]);
@@ -125,7 +125,7 @@ void cut_file(const char* filein, const char* dbpath){
 }
 
 void readfile(const char* filein){
-	commom::Func f;
+	//////commom::Func f;	;	;	
 	FILE*fi = fopen(filein,"r");
 	if (fi == NULL) {
 		commom::LOG_INFO("open file error" + string(filein));
@@ -134,9 +134,9 @@ void readfile(const char* filein){
 	char buffer[MAX_LENTH];		
 	std::string str = "";
 	std::vector<std::string> v ;
-	while ( f.ReadLine(buffer,MAX_LENTH,fi)!=NULL)	{
-		str = f.GetLine(buffer); 
-		f.Split("\t", str, v);
+	while ( commom::ReadLine(buffer,MAX_LENTH,fi)!=NULL)	{
+		str = commom::GetLine(buffer); 
+		commom::Split("\t", str, v);
 		if(v.size() != 3)continue;
 		if(v.at(1) == "1"){
 			commom::DEBUG_INFO(str);

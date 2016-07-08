@@ -18,7 +18,7 @@ namespace wordexpand{
 		Sever(){}
 		~Sever(){}
 	public:
-		commom::Func f;
+		//commom::Func f;	;
 	public:
 		bool Init(const char* dictpath);
 		bool StartSever();

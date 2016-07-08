@@ -172,13 +172,13 @@ namespace wordexpand{
 		std::vector<string> v;
 		std::vector<string> tmp;
 		std::map<string, string> dict;
-		f.Split(",", str, v);
-		commom::DEBUG_INFO(f.ConvertToStr(v.size()));
+		commom::Split(",", str, v);
+		commom::DEBUG_INFO(commom::ConvertToStr(v.size()));
 		if(v.size() == 0){
 			return "";
 		}else{
 			for(int i =0; i< v.size(); i++){
-				f.Split(":", v.at(i),tmp);
+				commom::Split(":", v.at(i),tmp);
 				if(tmp.size() == 2){
 					string firststr ="";
 					string secondstr ="";
@@ -213,7 +213,7 @@ namespace wordexpand{
 		commom::DEBUG_INFO(ParamToStr(taskParams));
 		return GetStaue(LzApiPost(ParamToStr(taskParams)));
 	}
-	string Lz::HDFSToTDW(const char*filename,string& parentid,string& taskid){
+	string Lz::HDFSToTDW(string& parentid,string& taskid){
 		std::map<string,string> taskParams;
 		Init(taskParams);
 		std::map<string,string> dcitExtParam;
@@ -224,7 +224,7 @@ namespace wordexpand{
 		dcitExtParam["loadMode"] = "TRUNCATE";				
 		dcitExtParam["partitionType"] = "P_"+ taskid;		
 		dcitExtParam["sourceColumnNames"] = "taskid,id,tag,flag,score";			
-		dcitExtParam["sourceFileNames"] = filename;					
+		dcitExtParam["sourceFileNames"] = taskid;					
 		dcitExtParam["sourceFilePath"] = "/stage/outface/wxg/g_cdg_weixin/seanxy/tdw/";			
 		dcitExtParam["tableName"] = "wxy_sourceid_partition";					
 		dcitExtParam["tdw"] = "tdw_tl";					
@@ -241,8 +241,8 @@ namespace wordexpand{
 		std::map<string,string> taskParams;
 		Init(taskParams);
 		std::map<string,string> dcitExtParam;
-		//dcitExtParam["file_name"] = "source2uin.py";
-		dcitExtParam["file_name"] = "source2uintest.py";
+		dcitExtParam["file_name"] = "source2uin.py";
+		//dcitExtParam["file_name"] = "source2uintest.py";
 		dcitExtParam["params"] = string(taskid);	
 		taskParams["parentTaskId"] ="{"+parentid+":1}";
 		taskParams["taskType"] = "121";
@@ -281,7 +281,6 @@ namespace wordexpand{
 	bool Lz::LzTaskApi(Sql& mySql,string& taskid, const char* filepath,string& uinnumber){
 		if(!PutLocalFileToHFDS(filepath)){
 			commom::LOG_INFO(taskid + ":\tPutLocalFileToHFDS Error");
-			mylog.LOG(taskid,"DEBUG_INFO : PutLocalFileToHFDS Error");
 			return false;
 		}
 		string  addpartitionid = AddPartition(taskid);
@@ -289,7 +288,7 @@ namespace wordexpand{
 			commom::LOG_INFO(taskid + ":\tAddPartition Error");
 			return false;
 		}
-		string hdfstotdwid = HDFSToTDW(filepath, addpartitionid,taskid);
+		string hdfstotdwid = HDFSToTDW(addpartitionid,taskid);
 		if(hdfstotdwid == ""){
 			commom::LOG_INFO(taskid + ":\tHDFSToTDW Error");
 			return false;

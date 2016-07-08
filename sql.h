@@ -48,7 +48,7 @@ namespace wordexpand{
 		Sql(){}
 		~Sql(){}
 	public://biz
-		commom::Func f;
+		//////commom::Func f;	;	;	
 		MYSQL myCont;
 	public://mysql
 		bool InitMysql();

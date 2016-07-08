@@ -2,9 +2,9 @@
 #include "../wordseg/seg.h"
 std::map<string,int> dict;
 seg::Wordseg mseg;
-commom::Func f;
+//////commom::Func f;	;	;	
 void maerge(const char* path, const char* pinttaipath, const char* otherpath){
-	commom::Func f;
+	//////commom::Func f;	;	;	
 	char buffer[MAX_LENTH];		
 	std::string str = "";
 	std::vector<std::string> v ;
@@ -13,7 +13,7 @@ void maerge(const char* path, const char* pinttaipath, const char* otherpath){
 	paout +=  "gamebizall";
 	FILE* fo = fopen(paout.c_str(),"ab+");
 	for(int i =1; i< 25; i++){
-		string pa = path + f.ConvertToStr(i) + ".txt";
+		string pa = path + commom::ConvertToStr(i) + ".txt";
 		FILE* fi = fopen(pa.c_str(),"r");
 		if((fi == NULL)||(fo == NULL)){
 			commom::DEBUG_INFO("open file error");
@@ -21,18 +21,18 @@ void maerge(const char* path, const char* pinttaipath, const char* otherpath){
 		}
 		int line = 0;
 		string wordstr = "";
-		while ( f.ReadLine(buffer,MAX_LENTH,fi)!=NULL)	{
-			str = f.GetLine(buffer); 
+		while ( commom::ReadLine(buffer,MAX_LENTH,fi)!=NULL)	{
+			str = commom::GetLine(buffer); 
 			if(line++ == 0){
 				wordstr = str;
 				continue;
 			}
-			f.Split("\t", str, v);
+			commom::Split("\t", str, v);
 			if(v.size() != 4){
 				continue;
 			}
 			if(v.at(0).size() != 10){
-				commom::DEBUG_INFO(f.ConvertToStr(i) + "uin error");
+				commom::DEBUG_INFO(commom::ConvertToStr(i) + "uin error");
 			}
 
 			if(dict.find(str) == dict.end()){
@@ -45,18 +45,18 @@ void maerge(const char* path, const char* pinttaipath, const char* otherpath){
 	}
 	for(std::map<string,string>::iterator it = dict.begin(); it != dict.end(); it++){
 		string tmp = it->first + "\t" + it->second + "\n";
-		f.WiteLine(tmp.c_str(), fo);
+		commom::WiteLine(tmp.c_str(), fo);
 	}
 	FILE* fi = fopen(pinttaipath,"r");
-	while ( f.ReadLine(buffer,MAX_LENTH,fi)!=NULL)	{
-		str = f.GetLine(buffer) + "\t\n";
-		f.WiteLine(str.c_str(), fo);
+	while ( commom::ReadLine(buffer,MAX_LENTH,fi)!=NULL)	{
+		str = commom::GetLine(buffer) + "\t\n";
+		commom::WiteLine(str.c_str(), fo);
 	}
 	fclose(fi);
 	fi = fopen(otherpath,"r");
-	while ( f.ReadLine(buffer,MAX_LENTH,fi)!=NULL)	{
-		str = f.GetLine(buffer) + "\t\n";
-		f.WiteLine(str.c_str(), fo);
+	while ( commom::ReadLine(buffer,MAX_LENTH,fi)!=NULL)	{
+		str = commom::GetLine(buffer) + "\t\n";
+		commom::WiteLine(str.c_str(), fo);
 	}
 	fclose(fi);
 	fclose(fo);
@@ -64,7 +64,7 @@ void maerge(const char* path, const char* pinttaipath, const char* otherpath){
 
 
 void sortbizuin(const char* path, const char* pinttaipath){
-	commom::Func f;
+	//////commom::Func f;	;	;	
 	char buffer[MAX_LENTH];		
 	std::string str = "";
 	std::vector<std::string> v ;
@@ -76,9 +76,9 @@ void sortbizuin(const char* path, const char* pinttaipath){
 		return;;
 	}
 	std::vector<std::pair<string, float> > dict; 
-	while ( f.ReadLine(buffer,MAX_LENTH,fi)!=NULL)	{
-		str = f.GetLine(buffer); 
-		f.Split("\t", str, v);
+	while ( commom::ReadLine(buffer,MAX_LENTH,fi)!=NULL)	{
+		str = commom::GetLine(buffer); 
+		commom::Split("\t", str, v);
 		if(v.size() != 4){
 			continue;
 		}
@@ -89,26 +89,26 @@ void sortbizuin(const char* path, const char* pinttaipath){
 		}
 	}
 	fclose(fi);
-	sort(dict.begin(), dict.end(), f.SortBySecondGreater);
-	commom::DEBUG_INFO(f.ConvertToStr(dict.size()));
+	sort(dict.begin(), dict.end(), commom::SortBySecondGreater);
+	commom::DEBUG_INFO(commom::ConvertToStr(dict.size()));
 	for(int j =0; j< dict.size(); j++){
-		str = dict.at(j).first + "\t" + f.ConvertToStr(dict.at(j).second) + "\n";
-		f.WiteLine(str.c_str(), fo);
+		str = dict.at(j).first + "\t" + commom::ConvertToStr(dict.at(j).second) + "\n";
+		commom::WiteLine(str.c_str(), fo);
 	}
 	fi = fopen(path,"r");
 	if((fi == NULL)||(fo == NULL)){
 		commom::DEBUG_INFO("open file error");
 		return;;
 	}
-	while ( f.ReadLine(buffer,MAX_LENTH,fi)!=NULL)	{
-		str = f.GetLine(buffer); 
-		f.Split("\t", str, v);
+	while ( commom::ReadLine(buffer,MAX_LENTH,fi)!=NULL)	{
+		str = commom::GetLine(buffer); 
+		commom::Split("\t", str, v);
 		if(v.size() != 4){
 			continue;
 		}
 		if(atof(v.at(3).c_str()) <4){
 			str = v.at(1) + "\t" + v.at(3) + "\n";
-			f.WiteLine(str.c_str(), fo);
+			commom::WiteLine(str.c_str(), fo);
 		}
 	}
 	fclose(fi);

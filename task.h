@@ -4,7 +4,6 @@
 #include "lz.h"
 #include "index.h"
 #include "model.h"
-#include "../log/log.h"
 typedef struct{
 	string id;
 	string keywds;
@@ -21,7 +20,6 @@ namespace wordexpand{
 		//commom::Log mylog;
 		Sql mySql;
 		Index mindex;
-		commom::Func f;
 	public:
 		string taskid;
 		string desc;

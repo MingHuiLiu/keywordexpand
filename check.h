@@ -1,6 +1,7 @@
 #ifndef _CHECK_H
 #define _CHECK_H
 #include "../commom/func.h"
+//#include <unistd.h>
 #include "lz.h"
 #include "index.h"
 #include <time.h> 
@@ -19,21 +20,19 @@ namespace wordexpand{
 		Check();
 		~Check();
 	public:
-		//int uinsize;//实际量级
 		string path;
 		Sql mySql;
 		Lz myLz;
-		commom::Func f;
 	public:
 		bool Init();
 		bool CheckLz(string taskid);
 		bool HdfsToLocal(string taskid);
 		bool Process(string taskid,string uinnumber);
 		bool Send(string taskid);
-		bool CheckTask();
+		//bool CheckTask();
 		bool AddRandom(const char* path,int num);
 	};
-
+	bool CheckTask();
 }
 #endif
 

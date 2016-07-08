@@ -1,12 +1,11 @@
 #include "index.h"
 #include "sever.h"
 #include "lz.h"
-#include "bitmap.h"
 #include "task.h"
 typedef FILE* _FILE;
 #define dbpath "/data/qspace/seanxywang/data/article/gamedailyarticle/"
 void ArtIndex(wordexpand::Index& index,const char* filein, const char* database){
-	commom::Func f;
+	//////commom::Func f;	;	;	
 	std::map<string, _FILE>filedict;
 	FILE*fi = fopen(filein,"r");
 	if (fi == NULL) {
@@ -17,19 +16,19 @@ void ArtIndex(wordexpand::Index& index,const char* filein, const char* database)
 	std::string str = "";
 	std::vector<std::string> v ;
 	int linenum = 0;
-	while ( f.ReadLine(buffer,MAX_LENTH,fi)!=NULL)	{
-		str = f.GetLine(buffer); 
-		f.Split("\t", str, v);
+	while ( commom::ReadLine(buffer,MAX_LENTH,fi)!=NULL)	{
+		str = commom::GetLine(buffer); 
+		commom::Split("\t", str, v);
 		if(v.size() != 5)continue;
 		string datestr = v.at(4);
 		if(filedict.find(datestr) == filedict.end()){
 			string tmpfath = dbpath + datestr;  
 			filedict[datestr] = fopen(tmpfath.c_str(),"ab+");
 			if(filedict[datestr] != NULL){
-				f.WiteLine((str + "\n").c_str(), filedict[datestr]);
+				commom::WiteLine((str + "\n").c_str(), filedict[datestr]);
 			}
 		}else{
-			f.WiteLine((str + "\n").c_str(), filedict[datestr]);
+			commom::WiteLine((str + "\n").c_str(), filedict[datestr]);
 		}
 	}
 	fclose(fi);

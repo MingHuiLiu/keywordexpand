@@ -3,14 +3,14 @@
 
 void Brackets(string& str, std::map<std::string, int>& dict){
 	//commom::DEBUG_INFO(str);
-	commom::Func f;
+	//////commom::Func f;	;	;	
 	string::size_type indexa = str.find("《");
 	string::size_type indexad = 0;
 	string strcopy = "";
 	while(indexa != string::npos){
 		//commom::DEBUG_INFO(str);
 		indexad =  str.find("》");
-		//commom::DEBUG_INFO("indexad: " + f.ConvertToStr(indexad));
+		//commom::DEBUG_INFO("indexad: " + commom::ConvertToStr(indexad));
 		if((indexad != string::npos)&&(indexad > indexa)){
 			string temp = "";
 			temp.append(str,indexa + 3,indexad - indexa -3);
@@ -25,12 +25,12 @@ void Brackets(string& str, std::map<std::string, int>& dict){
 		}
 		//commom::DEBUG_INFO(str);
 		indexa = str.find("《");
-		//commom::DEBUG_INFO("indexa: "  + f.ConvertToStr(indexa));
+		//commom::DEBUG_INFO("indexa: "  + commom::ConvertToStr(indexa));
 	}
 }
 
 void getname(const char* filein, const char* dbpath){
-	commom::Func f;
+	//////commom::Func f;	;	;	
 	FILE*fi = fopen(filein,"r");
 	if (fi == NULL) {
 		commom::LOG_INFO("open file error" + string(filein));
@@ -42,10 +42,10 @@ void getname(const char* filein, const char* dbpath){
 	std::vector<std::string> v ;
 	std::map<std::string, int> dict ;
 	int linenum = 0;
-	while ( f.ReadLine(buffer,MAX_LENTH,fi)!=NULL)	{
-		str = f.GetLine(buffer); 
-		f.Split("\t", str, v);
-		//commom::DEBUG_INFO(f.ConvertToStr(v.size()));
+	while ( commom::ReadLine(buffer,MAX_LENTH,fi)!=NULL)	{
+		str = commom::GetLine(buffer); 
+		commom::Split("\t", str, v);
+		//commom::DEBUG_INFO(commom::ConvertToStr(v.size()));
 		if(v.size() != 5){
 			continue;
 		}
@@ -56,17 +56,17 @@ void getname(const char* filein, const char* dbpath){
 	for(std::map<std::string, int>::iterator it = dict.begin(); it != dict.end(); it++){
 		vv.push_back(std::pair<string, float>(it->first, it->first.size()));
 	}
-	//commom::DEBUG_INFO(f.ConvertToStr(v.size()));
-	sort(vv.begin(), vv.end(),f.SortBySecondLess);
+	//commom::DEBUG_INFO(commom::ConvertToStr(v.size()));
+	sort(vv.begin(), vv.end(),commom::SortBySecondLess);
 	for(int j =0; j < vv.size(); j++){
-		f.WiteLine((vv.at(j).first + string("\n")).c_str(), fo);
+		commom::WiteLine((vv.at(j).first + string("\n")).c_str(), fo);
 	}
 	fclose(fi);
 	fclose(fo);
 }
 
 void filter(const char* filein, const char* dictpa,const char* dbpath){
-	commom::Func f;
+	//////commom::Func f;	;	;	
 	FILE*fi = fopen(dictpa,"r");
 	if (fi == NULL) {
 		commom::LOG_INFO("open file error" + string(dictpa));
@@ -77,9 +77,9 @@ void filter(const char* filein, const char* dictpa,const char* dbpath){
 	std::vector<std::string> v ;
 	std::map<std::string, int> dict ;
 	int linenum = 0;
-	while ( f.ReadLine(buffer,MAX_LENTH,fi)!=NULL)	{
-		str = f.GetLine(buffer); 
-		f.Split(" ", str, v);
+	while ( commom::ReadLine(buffer,MAX_LENTH,fi)!=NULL)	{
+		str = commom::GetLine(buffer); 
+		commom::Split(" ", str, v);
 		if(v.size() == 0){
 			continue;
 		}
@@ -94,10 +94,10 @@ void filter(const char* filein, const char* dictpa,const char* dbpath){
 		return ;
 	}
 	FILE* fo = fopen(dbpath,"ab+");
-	while ( f.ReadLine(buffer,MAX_LENTH,fi)!=NULL)	{
-		str = f.GetLine(buffer); 
+	while ( commom::ReadLine(buffer,MAX_LENTH,fi)!=NULL)	{
+		str = commom::GetLine(buffer); 
 		if(dict[str] == 0){
-			f.WiteLine((str + string("\n")).c_str(), fo);
+			commom::WiteLine((str + string("\n")).c_str(), fo);
 		}	
 	}
 	fclose(fi);

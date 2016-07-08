@@ -4,7 +4,6 @@
 #include "sql.h"
 #include <curl/curl.h>
 #include "../commom/func.h"
-#include "../log/log.h"
 struct url_data {
 	size_t size;
 	char* data;
@@ -16,13 +15,11 @@ namespace wordexpand{
 			//mySql.InitMysql();
 			headers = NULL;
 			curl = NULL;
-			mylog.Init("./log/");
 		}
 		~Lz(){}
 	public://
 		//Sql mySql;
-		commom::Func f;
-		commom::Log mylog;
+		//////commom::Func f;	;	;	
 		struct curl_slist *headers;
 		CURL *curl;
 		
@@ -33,7 +30,7 @@ namespace wordexpand{
 		bool LzTaskApi(Sql& mySql,string& taskid, const char* filepath, string& uinnumber);
 		bool PutLocalFileToHFDS(const char* filepath);
 		string AddPartition(string& taskid);
-		string HDFSToTDW(const char*filename,string& parentid,string& taskid);
+		string HDFSToTDW(string& parentid,string& taskid);
 		string Getuins(string& parentid,string& taskid);
 		string TDW2HDFS(string& parentid,string& taskid);
 		bool ChecKLzTask(string& taskid);
