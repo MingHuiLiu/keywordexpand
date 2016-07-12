@@ -36,6 +36,13 @@ typedef struct{
 } articleinfo; 
 
 typedef struct{
+	string roomid;
+	string title;
+	float score;
+} roominfo; 
+
+
+typedef struct{
 	string taskid;
 	string ds;
 	string lzid;

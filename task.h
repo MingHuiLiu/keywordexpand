@@ -26,7 +26,7 @@ namespace wordexpand{
 		confignfo inputconf;	
 		string localfiledir;
 		std::vector<bizinfo> bizresults;
-		std::vector<articleinfo> articleresults;
+		std::vector<roominfo> roomresults;
 	public:
 		bool ArgumentParsing(const char* str);
 		bool Config(std::map<string, string>& taskinfo);

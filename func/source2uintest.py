@@ -37,28 +37,6 @@ def get_article_click_uin(tdw):
     sql="use wxg_data_valueless"
     res = tdw.execute(sql)
 
-
-    #article
-    """
-    sql = '''INSERT table wxy_daily_game_uinlist
-              SELECT
- 	            a.taskid as taskid,
- 	            b.uin as uin,
- 	           '2' as tag,
-           	   '1' as flag,
- 	            1 as score
-             FROM
-               (SELECT * FROM wxy_sourceid_partition where taskid = '%s' and tag = '1') a
-             JOIN
-                wxg_data_valueless::wxy_game_article_read b
-             ON
-                a.id = concat(ltrim(b.bizuin_),'_',ltrim(b.appmsgid_),'_',ltrim(b.itemidx_))
-             where b.ds >= "20160511" and b.ds <= "20160610"
-          '''%taskid_
-    WriteLog("running=",sql)
-    res = tdw.execute(sql)
-    """
-
     #biz
     sql = '''INSERT table wxy_daily_game_uinlist
               SELECT
@@ -78,6 +56,25 @@ def get_article_click_uin(tdw):
     WriteLog("running=",sql)
     res = tdw.execute(sql)
 
+    #room
+    sql = '''INSERT table wxy_daily_game_uinlist
+              SELECT
+ 	            a.taskid as taskid,
+ 	            b.fuin as uin,
+ 	           '2' as tag,
+           	   '1' as flag,
+ 	            1 as score
+             FROM
+               (SELECT * FROM wxy_sourceid_partition where taskid = '%s' and tag = '2') a
+             JOIN
+                wxg_data_valueless::wxy_room_game_member  b
+             ON
+                 a.id = b.froom_id
+             where b.fdate_cd = "20160701"
+          '''%taskid_
+    WriteLog("running=",sql)
+    res = tdw.execute(sql)
+
 
     #restable wxy_daily_game_uinres
     sql = '''INSERT OVERWRITE TABLE wxy_daily_game_uinres
@@ -93,13 +90,12 @@ def get_article_click_uin(tdw):
     WriteLog("running=",sql)
     res = tdw.execute(sql)
 
-    #filter old
-    """
+    #filter
     sql = '''INSERT TABLE wxy_daily_game_active_uin
               SELECT
                 a.taskid as taskid,
  	            a.uin as uin,
- 	            a.tag as tag,
+ 	            cast(TO_NUMBER(a.tag) + 10*b.fgame_is_pay) as tag,
  	            a.score + b.fgame_is_pay as score
              FROM
                 (select '%s' as taskid,uin as uin ,cast(SUM(TO_NUMBER(tag))as STRING) as tag, SUM(score) as score from wxy_daily_game_uinres GROUP BY uin) a
@@ -111,6 +107,7 @@ def get_article_click_uin(tdw):
           '''%(taskid_, taskid_)
     WriteLog("running=",sql)
     res = tdw.execute(sql)
+
     """
     sql = '''INSERT TABLE wxy_daily_game_active_uin
               SELECT
@@ -128,7 +125,7 @@ def get_article_click_uin(tdw):
           '''%taskid_
     WriteLog("running=",sql)
     res = tdw.execute(sql)
-
+    """
 def TDW_PL(tdw, argv=[]):
     config(argv)
     print "hello TDW"

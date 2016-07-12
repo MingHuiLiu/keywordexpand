@@ -20,21 +20,24 @@ namespace wordexpand{
 	public://biz
 		bool Init(const char* dictpath);
 		bool InitRetrieval(const char* dictpath);
+		bool RoomIndex(const char* filein, const char* dbpath);
 		bool BizIndex(const char* filein, const char* dbpath);
-		bool ArticleIndex(const char* filein, const char* dbpath);
-		bool Retrieval(string& source, string& query,Sql& mySql,std::map<string, string>& taskinfo,
+		bool Expand(std::vector<std::string>& query, std::vector<string>& v);
+		bool Retrieval(string& source, string& query,string& uinnumber,Sql& mySql,std::map<string, string>& taskinfo,
 				std::vector<bizinfo>& bizresults,
-				std::vector<articleinfo>& articleresults);
+				std::vector<roominfo>& roomresults);
+		bool RoomRetrieval(std::vector<string>& querylist,std::vector<roominfo>& roomresults);
 		bool BizRetrieval(std::vector<string>& querylist,std::vector<bizinfo>& results);
 		bool BizRetrieval(Xapian::Enquire& enquire, std::vector<string>& querylist,
 						 std::vector<bizinfo>& results,const char* relationship);
 		string JionQuery(std::vector<string>& querylist, string str);
-		string ArticleJionQuery(std::vector<string>& querylist);
 		bool Rank(Xapian::MSet& matches,std::vector<bizinfo>& results);
-		bool ArticleRank(Xapian::MSet& matches,std::vector<articleinfo>& results);
-		bool FilerGame(string str);
-
+		
 	public://article
+		bool FilerGame(string str);
+		string ArticleJionQuery(std::vector<string>& querylist);
+		bool ArticleRank(Xapian::MSet& matches,std::vector<articleinfo>& results);
+		bool ArticleIndex(const char* filein, const char* dbpath);
 		bool ArticleRetrieval(std::vector<string>& querylist,std::vector<articleinfo>& results);
 		bool ArticleRetrieval(Xapian::Enquire& enquire, std::vector<string>& querylist,
 			std::vector<articleinfo>& results,const char* relationship);

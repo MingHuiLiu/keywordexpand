@@ -50,7 +50,7 @@ int main(int argc, char *argv[]) {
 		index.BizIndex(argv[2],argv[3]);
 	}else if(atoi(argv[1]) == 2){
 		index.Init(argv[4]);
-		ArtIndex(index,argv[2],argv[3]);
+		index.RoomIndex(argv[2],argv[3]);
 	}
 	return 0;
 }

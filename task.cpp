@@ -14,7 +14,7 @@ namespace wordexpand{
 	}
 	Task::~Task(){
 		bizresults.clear();
-		articleresults.clear();
+		roomresults.clear();
 	}
 	//参数解析
 	bool Task::ArgumentParsing(const char* str){
@@ -156,7 +156,7 @@ namespace wordexpand{
 	//检索
 	bool Task::Retrieval(std::map<string, string>& taskinfo){
 		commom::DEBUG_INFO("Begin Retrieval");
-		return mindex.Retrieval(inputconf.source,inputconf.keywds,mySql, taskinfo, bizresults, articleresults);
+		return mindex.Retrieval(inputconf.source,inputconf.keywds,inputconf.num,mySql, taskinfo, bizresults, roomresults);
 	}
 
 	//排序
@@ -181,11 +181,11 @@ namespace wordexpand{
 			commom::WiteLine(str.c_str(),fo);
 		}	
 		i = 0;
-		for(std::vector<articleinfo>::iterator it = articleresults.begin(); it != articleresults.end(); it++){
+		for(std::vector<roominfo>::iterator it = roomresults.begin(); it != roomresults.end(); it++){
 			if(i++ > 10000){
 				break;
 			}
-			str = taskid + string("\t") + (*it).articleuin + string("\t1\t1\t") +commom::ConvertToStr((*it).score) + "\n";
+			str = taskid + string("\t") + (*it).roomid + string("\t2\t1\t") +commom::ConvertToStr((*it).score) + "\n";
 			commom::WiteLine(str.c_str(),fo);
 		}	
 		fclose(fo);
