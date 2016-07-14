@@ -11,13 +11,8 @@ namespace wordexpand{
 		Index(){}
 		~Index(){}
 	public://biz
-		////commom::Func f;	;	;
 		seg::Wordseg mseg;
-		std::map<string,string>expanddict;
-		std::map<string, int>gamefilterdict;
-		//Sql mySql;
-
-	public://biz
+	public:
 		bool Init(const char* dictpath);
 		bool InitRetrieval(const char* dictpath);
 		bool RoomIndex(const char* filein, const char* dbpath);
@@ -27,21 +22,11 @@ namespace wordexpand{
 				std::vector<bizinfo>& bizresults,
 				std::vector<roominfo>& roomresults);
 		bool RoomRetrieval(std::vector<string>& querylist,std::vector<roominfo>& roomresults);
+		bool BizRetrievalAll(std::vector<string>& querylist,std::vector<bizinfo>& results);
 		bool BizRetrieval(std::vector<string>& querylist,std::vector<bizinfo>& results);
-		bool BizRetrieval(Xapian::Enquire& enquire, std::vector<string>& querylist,
-						 std::vector<bizinfo>& results,const char* relationship);
-		string JionQuery(std::vector<string>& querylist, string str);
-		bool Rank(Xapian::MSet& matches,std::vector<bizinfo>& results);
 		
 	public://article
-		bool FilerGame(string str);
-		string ArticleJionQuery(std::vector<string>& querylist);
-		bool ArticleRank(Xapian::MSet& matches,std::vector<articleinfo>& results);
-		bool ArticleIndex(const char* filein, const char* dbpath);
-		bool ArticleRetrieval(std::vector<string>& querylist,std::vector<articleinfo>& results);
-		bool ArticleRetrieval(Xapian::Enquire& enquire, std::vector<string>& querylist,
-			std::vector<articleinfo>& results,const char* relationship);
-
+		string JionQuery(std::vector<string>& querylist);
 	public:
 		void TestRank(Xapian::MSet& matches);
 	};

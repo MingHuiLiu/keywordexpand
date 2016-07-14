@@ -297,17 +297,36 @@ void bizclassfy(const char* inpath, const char* outpath){
 	}
 }
 
-
-
-void roomclassfy(){
-
+void count(const char* inpath){
+	FILE* fi = fopen(inpath,"r");
+	std::map<string,int> dict;
+	dict.clear();
+	if(fi == NULL){
+		commom::DEBUG_INFO("open file error");
+		return;
+	}
+	char buffer[MAX_LENTH];		
+	std::string str = "";
+	std::vector<std::string> v ;
+	while ( commom::ReadLine(buffer,MAX_LENTH,fi)!=NULL){
+		str = commom::GetLine(buffer); 
+		if(str == "")continue;
+		commom::Split("\t", str, v);
+		if(v.size() == 3){
+			dict[v.at(1)]++;
+		}
+	}
+	for(std::map<string,int>::iterator it = dict.begin(); it != dict.end(); it++){
+		commom::DEBUG_INFO(it->first);
+		commom::DEBUG_INFO(commom::ConvertToStr(it->second));
+	}
 }
 
 int main(int argc, char *argv[]) {
 	//gameprocess(argv[1],argv[2]);
 	//loaddict(argv[1],argv[2]);
-	loadbizdict(argv[1],argv[2]);
-	bizclassfy(argv[3],argv[4]);
-	//_filter(argv[3],argv[4]);
+	//loadbizdict(argv[1],argv[2]);
+	//bizclassfy(argv[3],argv[4]);
+	count(argv[1]);
 	return 0;
 }
