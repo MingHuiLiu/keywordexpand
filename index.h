@@ -21,9 +21,9 @@ namespace wordexpand{
 		bool Retrieval(string& source, string& query,string& uinnumber,Sql& mySql,std::map<string, string>& taskinfo,
 				std::vector<bizinfo>& bizresults,
 				std::vector<roominfo>& roomresults);
-		bool RoomRetrieval(std::vector<string>& querylist,std::vector<roominfo>& roomresults);
-		bool BizRetrievalAll(std::vector<string>& querylist,std::vector<bizinfo>& results);
-		bool BizRetrieval(std::vector<string>& querylist,std::vector<bizinfo>& results);
+		bool RoomRetrieval(Xapian::Query& query,std::vector<roominfo>& roomresults,std::map<string,int>& bizdict);
+		bool BizRetrievalAll(Xapian::Query& query,std::vector<bizinfo>& results,std::map<string,int>& bizdict);
+		bool BizRetrieval(Xapian::Query& query,std::vector<bizinfo>& results,std::map<string,int>& bizdict);
 		
 	public://article
 		string JionQuery(std::vector<string>& querylist);

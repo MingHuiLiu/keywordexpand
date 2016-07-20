@@ -2,7 +2,7 @@
 namespace wordexpand{
 	Check::Check(){
 		Init();
-		path = "10.234.151.147::mmocgameuin//from_data_apply/";
+		sendpath = "10.234.151.147::mmocgameuin//from_data_apply/";
 	}
 	Check::~Check(){}
 	bool Check::Init(){
@@ -165,9 +165,9 @@ namespace wordexpand{
 		mySql.UpdataTask(taskid,string("5"));
 		string strscp = "rsync -av ";
 		strscp += (PATH + taskid);
-		strscp += " qspace@10.234.151.147::mmocgameuin/from_data_apply";//10.234.133.11
+		strscp += " qspace@10.234.151.147:10.234.151.147::mmocgameuin/from_data_apply";//10.234.133.11
 		system(strscp.c_str());
-		path += taskid;
+		//path += taskid;
 
 		string fileout = PATH + taskid;
 		FILE* fi = fopen(fileout.c_str(), "r");
@@ -181,7 +181,8 @@ namespace wordexpand{
 		while ( commom::ReadLine(buffer,MAX_LENTH,fi)!=NULL)	{
 			linenumber++ ;
 		}
-		if(myLz.SendUinStaue(taskid,commom::ConvertToStr(linenumber),path)){
+		string sendstrpath = sendpath + taskid;
+		if(myLz.SendUinStaue(taskid,commom::ConvertToStr(linenumber),sendstrpath)){
 			commom::LOG_INFO("send");
 			mySql.UpdataTask(taskid,string("4"));
 		}else{

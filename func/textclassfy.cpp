@@ -206,8 +206,7 @@ void textclassfy(const char* inpath, const char* outpath){
 			//commom::LOG_INFO("#################");
 			//commom::LOG_INFO(str);
 			str += "\n";
-			commom::WiteLine(str.c_str(), fo);
-			
+			commom::WiteLine(str.c_str(), fo);			
 			//commom::LOG_INFO(v.at(0));
 			//commom::DEBUG_INFO(mseg.QuickSegement(v.at(0).c_str()));
 		}
@@ -322,11 +321,135 @@ void count(const char* inpath){
 	}
 }
 
+string getchinese (string& str){
+	//<dt class="basicInfo-item name">游戏平台</dt>
+	string s = "";
+	string::size_type indexa = str.find(">");
+	s.append(str,indexa+1, str.size() -6 - indexa);
+	commom::DEBUG_INFO(s);
+	return s;
+} 
+//game 百度百科游戏解析
+void baikegame(const char* inpath, const char* outpath){
+	FILE* fi = fopen(inpath,"r");
+	FILE* fo = fopen(outpath,"ab+");
+	std::map<string,string> dict;
+	dict.clear();
+	if((fi == NULL)||(fo == NULL)){
+		commom::DEBUG_INFO("open file error");
+		return;
+	}
+	char buffer[MAX_LENTH];		
+	std::string str = "";
+	std::vector<std::string> v ;
+
+	bool gametag = false;
+	bool title = false;
+	bool lemmaSummary = false;
+	bool lemmaSummary_info = false;
+	string lemmaSummary_info_tmp = "";
+	string titlestr = "";
+	string tmp = "";
+	string desc ="";
+	string wordstr = "";
+	while ( commom::ReadLine(buffer,MAX_LENTH,fi)!=NULL){
+		str = commom::GetLine(buffer); 
+		if(str == "")continue;
+		commom::Split(":", str, v);
+		if(v.size() > 0){
+			if(v.at(0) == "seanxy"){
+				gametag == true;
+				wordstr = str + "\n";
+				commom::WiteLine(wordstr.c_str(),fo);
+				continue;
+			}
+		}
+		if(title == true){
+			if(str.find("<h1") != string::npos){
+				titlestr += (" " + getchinese(titlestr));
+			}else if(str.find("<h2") != string::npos){
+				titlestr += (" " + getchinese(titlestr));
+			}else{
+				title = false;
+				titlestr += "\n";
+				commom::WiteLine(titlestr.c_str(),fo);
+				titlestr = "title:";
+				continue;
+			}
+		}else if(lemmaSummary == true){
+			if(lemmaSummary_info == true){
+				if(str.find("</dl></div>") != string::npos) {
+					lemmaSummary_info = false;
+					lemmaSummary_info_tmp += "\n";
+					commom::WiteLine(lemmaSummary_info_tmp.c_str(),fo);
+					lemmaSummary_info_tmp = "";
+					continue;
+				}else{
+					if(getchinese(str) != ""){
+						lemmaSummary_info_tmp += (";" + getchinese(str) + ";");
+					}
+				}
+			}else{
+				if(str.find("<div class=\"basic-info cmn-clearfix\">") != string::npos){
+					lemmaSummary_info = true;
+					lemmaSummary_info_tmp = "info:";
+					continue;
+				}else {
+					desc = "desc:" + getchinese(str) + "\n";
+					commom::WiteLine(desc.c_str(),fo);
+				}
+			}
+
+		}
+		//description
+		if(str.find("<meta name=\"description\"") != string::npos){
+			//<meta name="description" content="
+			string t = "<meta name=\"description\" content=\"";
+			string s = "";
+			s.append(str,t.size(), str.size()-2 - t.size());
+			tmp = "description:" + s + "\n";
+			commom::WiteLine(tmp.c_str(),fo);
+			continue;
+		}
+		//title
+		if(str.find("<title>") != string::npos){
+			//
+			string s = "";
+			s.append(str,7, str.size()-10);
+			tmp = "description:" + s + "\n";
+			commom::WiteLine(tmp.c_str(),fo);
+			continue;
+		}
+		//keywords
+		if(str.find("<meta name=\"keywords\"") != string::npos){
+			//<meta name="keywords" content="
+			string t = "<meta name=\"keywords\" content=\"";
+			string s = "";
+			s.append(str,t.size(), str.size()-2 - t.size());
+			tmp = "description:" + s + "\n";
+			commom::WiteLine(tmp.c_str(),fo);
+			continue;
+		}
+		//lemmaWgt-lemmaTitle-title <dd class="lemmaWgt-lemmaTitle-title">
+		if(str.find("lemmaWgt-lemmaTitle-title") != string::npos){
+			title = true;
+			continue;
+		}
+		if(str.find("module=\"lemmaSummary\"") != string::npos){
+			lemmaSummary = true;
+			continue;
+		}
+		//commom::DEBUG_INFO(dict[v.at(0)]);
+	}
+}
+
+
 int main(int argc, char *argv[]) {
 	//gameprocess(argv[1],argv[2]);
 	//loaddict(argv[1],argv[2]);
 	//loadbizdict(argv[1],argv[2]);
 	//bizclassfy(argv[3],argv[4]);
-	count(argv[1]);
+	//count(argv[1]);
+	baikegame(argv[1],argv[2]);
 	return 0;
 }

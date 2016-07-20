@@ -174,7 +174,7 @@ namespace wordexpand{
 		}
 		int i = 0;
 		for(std::vector<bizinfo>::iterator it =  bizresults.begin(); it != bizresults.end(); it++){
-			if(i++ > 500){
+			if(i++ > 5000){
 				break;
 			}
 			str = taskid + string("\t") + (*it).uin + string("\t0\t1\t") +commom::ConvertToStr((*it).score) + "\n";
@@ -182,7 +182,7 @@ namespace wordexpand{
 		}	
 		i = 0;
 		for(std::vector<roominfo>::iterator it = roomresults.begin(); it != roomresults.end(); it++){
-			if(i++ > 10000){
+			if(i++ > 500000){
 				break;
 			}
 			str = taskid + string("\t") + (*it).roomid + string("\t2\t1\t") +commom::ConvertToStr((*it).score) + "\n";

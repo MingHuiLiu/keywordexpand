@@ -20,7 +20,7 @@ namespace wordexpand{
 		Check();
 		~Check();
 	public:
-		string path;
+		string sendpath;
 		Sql mySql;
 		Lz myLz;
 	public:
